@@ -45,6 +45,32 @@ device, including:
 
 One last thing: the device should be as easy to reproduce as possible, in case
 someone would like to make another one after I have gone away. Let's see how we
-go.
+go!
+
+GETTING STARTED: WEEKS 1 & 2
+----------------------------
+My initial setup for this project has included installing Ubuntu 22.04 onto the 
+Seeed (likely how I'll refer to the embeddable computer from here on). The 
+slightly older LTS version of Ubuntu has been chosen in hopes that it may make
+interacting with the included Raspberry Pi GPIO pins an easier process - Seeed
+(the company that makes this computer) includes instructions on their website
+for Ubuntu versions up until 22.04.
+
+Seeed documentation:
+https://wiki.seeedstudio.com/ODYSSEY-X86J4105-GPIO/
+
+I have opted to give the device a fixed IP to allow it to be patched straight
+into my laptop. I have then enabled masquerading on the laptop to enable the
+Seeed to connect to the internet. It should only need internet for development
+and updating, so hopefully this is fine. the Seeed has the fixed IP 192.168.8.8,
+and I have temporarily given my laptop ethernet port the IP 192.168.8.2.
+
+Instructions for the masquerading:
+https://securitynetworkinglinux.com/how-to-masquerade-nat-ipv4-traffic-using-ufw-on-ubuntu-cli/
+
+Next steps:
+- Testing the usb3 cameras
+- test the Seeed GPIO
+- start writing the control script
 
 
