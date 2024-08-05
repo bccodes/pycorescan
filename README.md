@@ -68,9 +68,15 @@ and I have temporarily given my laptop ethernet port the IP 192.168.8.2.
 Instructions for the masquerading:
 https://securitynetworkinglinux.com/how-to-masquerade-nat-ipv4-traffic-using-ufw-on-ubuntu-cli/
 
+Creating a systemd service to start a python script:
+https://www.raspberrypi-spy.co.uk/2015/10/how-to-autorun-a-python-script-on-boot-using-systemd/
+
 Next steps:
 - Testing the usb3 cameras
 - test the Seeed GPIO
 - start writing the control script
+
+Working on getting the USB to mount automatically. Followed these steps on the Seeed:
+https://forums.raspberrypi.com/viewtopic.php?t=41056
 
 
