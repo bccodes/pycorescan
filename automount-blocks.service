@@ -1,0 +1,22 @@
+# This file works with automount.script to enable automatic mounting of USB mass storage.
+# 
+# Copy this file to /etc/systemd/system/
+# then run sudo systemctl daemon-reload
+# and sudo systemctl start automount-blocks.service
+# check it with sudo systemctl status automount-blocks.service
+
+
+
+[Unit]
+Description=Automatically Mount Block Devices
+After=network.target
+
+[Service]
+ExecStart=/home/raptor/automount.script
+Type=simple
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
