@@ -71,12 +71,14 @@ https://securitynetworkinglinux.com/how-to-masquerade-nat-ipv4-traffic-using-ufw
 Creating a systemd service to start a python script:
 https://www.raspberrypi-spy.co.uk/2015/10/how-to-autorun-a-python-script-on-boot-using-systemd/
 
+I have successfully gotten the USB to automatically mount on the Seeed by adding
+a systemd service that calls a shell script. The script calls udisks2 to mount
+the USB mass storage under /mnt/usb.
+
 Next steps:
 - Testing the usb3 cameras
 - test the Seeed GPIO
 - start writing the control script
 
-Working on getting the USB to mount automatically. Followed these steps on the Seeed:
-https://forums.raspberrypi.com/viewtopic.php?t=41056
 
 
