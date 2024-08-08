@@ -78,7 +78,7 @@ the USB mass storage under /mnt/usb.
 Next steps:
 - Testing the usb3 cameras
 - test the Seeed GPIO
-- start writing the control script
+- write the control script to poll usb and busy/error state if not ready
 
 
 
