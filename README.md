@@ -15,7 +15,8 @@ HARDWARE
 The provided equipment includes:
 
 - Seeed Odyssey x86 computer
-- 2x USB3 Cameras
+- 2x Basler acA1300-200uc USB3 Cameras
+https://www.baslerweb.com/en/shop/aca1300-200uc
 - 2x Halo (ring) lights
 - 2x UV lights
 - Core scanner prototype platform
@@ -80,5 +81,39 @@ Next steps:
 - test the Seeed GPIO
 - write the control script to poll usb and busy/error state if not ready
 
+WEEK 3
+------
+Updated requirements following meeting with Anton:
+- need to view camera preview feed from remote device
+Solution:
+- use ros2 and serve a WIFI access point from the Seeed
+- connect to the access point from the dashboard (remote pc)
+- interact with the device through foxglove GUI
 
+Progress since last update:
+- Set up ros2 package with usb_cam, image_saver and foxglove_bridge
+- tested foxglove-studio for viewing camera feed and sending capture requests
 
+Tasks this week:
+- solve power circuit requirements
+- put in shopping list for parts
+- test basler cameras with usb_cam ros package
+
+Power needs:
+- Seeed odyssey: 1x 12v 2a
+- Bright UV lights: 2x 24v 1.25a
+- Halo lights: 2x 12v
+- Basler USB3 cameras: 2x 24v (usb power option)
+
+Due to the new workflow process, the user may interact with the scanner device and 
+Seeed computer through a handheld barcode scanner and possibly by connecting and 
+disconnecting a USB mass storage device. The remaining operations should be
+performed on the remote dashboard - connected via wifi and communicating via ROS2
+messages and services.
+
+Shopping list:
+- USB relay board, <=4x relays, 24v max
+https://numato.com/product/8-channel-usb-relay-module/
+- usb3.0 hub, <=4x ports
+https://core-electronics.com.au/bonelk-long-life-usb-a-to-4-port-usb-3-0-slim-hub-space-grey.html
+- 
