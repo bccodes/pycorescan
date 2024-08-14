@@ -132,10 +132,15 @@ Shopping list:
 https://numato.com/product/8-channel-usb-relay-module/ 
 - usb3.0 hub, <=4x ports (no power needed)
 https://core-electronics.com.au/bonelk-long-life-usb-a-to-4-port-usb-3-0-slim-hub-space-grey.html
+https://au.element14.com/connekt-gear/25-0058/usb-3-hub-4-port-bus-powered/dp/3498596
 - 2x usb micro b cables for camera data
 https://core-electronics.com.au/usb-3-0-micro-b-cable-1m.html
 - power supply to 24v, (7.5a?) 
 https://au.element14.com/xp-power/ahm180ps24c2-8/adaptor-ac-dc-medical-24v-7-5a/dp/2319716
 - step-down to 12v (4.5a?)
 https://core-electronics.com.au/12v-4-5a-step-down-voltage-regulator-d36v50f12.html
-- 3x reed switches
+https://au.element14.com/mascot/5060-24-12v/converter-dc-to-dc-12v-41w/dp/1183940
+- 3x reed switches + actuators
+https://au.element14.com/littelfuse/57045-000/magnetic-actuator-reed-switch/dp/4209275
+https://au.element14.com/littelfuse/59165-1-u-00-a/reed-switch-spst-no-5-1mm-th/dp/4254218
+
