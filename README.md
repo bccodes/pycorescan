@@ -100,6 +100,7 @@ Tasks this week:
 - test basler cameras with usb_cam ros package
 
 Power needs:
+------------
 - Seeed odyssey: 1x 12v 2a
 - Bright UV lights: 2x 24v 1.25a
 - Halo lights: 2x 12v
@@ -126,17 +127,15 @@ Circuit Ideas:
 -> Basler camera
 
 Shopping list:
+--------------
 - USB relay board, <=4x relays, 24v max
-https://numato.com/product/8-channel-usb-relay-module/
-- usb3.0 hub, <=4x ports
+https://numato.com/product/8-channel-usb-relay-module/ 
+- usb3.0 hub, <=4x ports (no power needed)
 https://core-electronics.com.au/bonelk-long-life-usb-a-to-4-port-usb-3-0-slim-hub-space-grey.html
-https://core-electronics.com.au/slimline-usb-3-0-7-port-hub.html
 - 2x usb micro b cables for camera data
 https://core-electronics.com.au/usb-3-0-micro-b-cable-1m.html
-- step-down to 24v (options: 2a?, 3.75a?, 5a?)
-https://core-electronics.com.au/24v-dc-2a-appliance-power-supply-adapter.html
-https://core-electronics.com.au/24v-dc-3-75a-fixed-2-1mm-tip-appliance-powerpack.html
-https://core-electronics.com.au/24v-dc-5a-fixed-2-1mm-tip-appliance-power-supply.html
-- step-down to 12v (2a? or 4.5a?)
-https://core-electronics.com.au/pololu-12v-2-2a-step-down-voltage-regulator-d24v22f12.html
+- power supply to 24v, (7.5a?) 
+https://au.element14.com/xp-power/ahm180ps24c2-8/adaptor-ac-dc-medical-24v-7-5a/dp/2319716
+- step-down to 12v (4.5a?)
 https://core-electronics.com.au/12v-4-5a-step-down-voltage-regulator-d36v50f12.html
+- 3x reed switches
