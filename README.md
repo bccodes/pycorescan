@@ -106,11 +106,11 @@ Power needs:
 - Halo lights: 2x 12v
 - Basler USB3 cameras: 2x 24v (usb power option)
 
-Due to the new workflow process, the user may interact with the scanner device and 
-Seeed computer through a handheld barcode scanner and possibly by connecting and 
-disconnecting a USB mass storage device. The remaining operations should be
-performed on the remote dashboard - connected via wifi and communicating via ROS2
-messages and services.
+Due to the new workflow process, the user may interact with the scanner device 
+and Seeed computer through a handheld barcode scanner and possibly by 
+connecting and disconnecting a USB mass storage device. The remaining 
+operations should be performed on the remote dashboard - connected via wifi and
+communicating via ROS2 messages and services.
 
 Circuit Ideas:
 (240v AC input)
