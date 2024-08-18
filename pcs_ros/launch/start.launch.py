@@ -36,27 +36,34 @@ def generate_launch_description():
         Node(
             package="usb_cam",
             executable="usb_cam_node_exe",
-            # arguments=["-p", cam_config_1],
             parameters=[cam_config_1],
-            remappings=[("__ns", "/usb_cam_0")],
+            remappings=[("__ns", "/usb_cam_0"),
+                        ("image_raw", "/lefty_raw")],
             name="cam_0"
         ),
         
         # Node(
         #     package="usb_cam",
         #     executable="usb_cam_node_exe",
-        #     arguments=["-p", cam_config_2],
-        #     remappings=[("__ns", "/usb_cam_1")],
+        #     parameters=[cam_config_2],
+        #     remappings=[("__ns", "/usb_cam_1"),
+        #                 ("image_raw", "/righty_raw")],
         #     name="cam_1"
         # ),
         #
         Node(
             package="image_view",
             executable="image_saver",
-            parameters=[
-                {'save_all_image': False}
-            ],
-            remappings=[("image", "/usb_cam_0/image_raw")]
-
-        )
+            parameters=[{'save_all_image': False}],
+            remappings=[("__ns", "/left_saver"),
+                        ("image", "/lefty_raw")]
+        ),
+        #
+        # Node(
+        #     package="image_view",
+        #     executable="image_saver",
+        #     parameters=[{'save_all_image': False}],
+        #     remappings=[("__ns", "/right_saver"),
+        #                 ("image", "/righty_raw")]
+        # )
     ])
