@@ -143,4 +143,36 @@ https://au.element14.com/mascot/5060-24-12v/converter-dc-to-dc-12v-41w/dp/118394
 - 3x reed switches + actuators
 https://au.element14.com/littelfuse/57045-000/magnetic-actuator-reed-switch/dp/4209275
 https://au.element14.com/littelfuse/59165-1-u-00-a/reed-switch-spst-no-5-1mm-th/dp/4254218
+- 3x reed switches
+
+WEEK 4
+------
+Ordered parts last Thursday! woohoooo
+
+Tasks this week (waiting for parts):
+- Set up ROS2 launch scripts
+- begin writing capture node
+- research solutions for barcode scanner node
+
+ROS2 Launch Patterns:
+---------------------
+The plan here is to have a single launch file (ros2 python) that can run 
+both camera driver nodes and another node to control the capture sequence.
+The launch script also needs to bring up a node to control a barcode
+scanner.
+
+The capture node needs to be written - it should run two image saver nodes
+pointed at the image_raw output of each camera. The images should be saved
+under a path/filename indicating the lighting mode (halo or uv) and the time
+and date of capture and the most recent barcode scanned.
+
+The Foxglove dashboard should also display the information of most recent
+barcode scanned.
+
+Launch plan:
+- left camera node
+- right camera node
+- barcode scanner node
+- capture control node
+- foxglove-bridge node
 
