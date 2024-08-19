@@ -66,7 +66,7 @@ def generate_launch_description():
     return LaunchDescription([
         left_cam,
         right_cam,
-        left_saver,
-        right_saver,
+        # left_saver,
+        # right_saver,
         foxglove_bridge
     ])

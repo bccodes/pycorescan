@@ -176,3 +176,11 @@ Launch plan:
 - capture control node
 - foxglove-bridge node
 
+Reflecting
+----------
+A sticking point is passing the currently active barcode to the image saver to 
+be used in the filename. currently seeking a solution, working on launching
+a capture control node which then starts 2 or 4 image saver nodes with the 
+passed in label as a parameter. not functional atm because the nodes 
+cannot start under a different rclpy context, i.e. 
+rclpy._rclpy_pybind11.RCLError: failed to create client: rcl node's context is invalid, at ./src/rcl/node.c:428
