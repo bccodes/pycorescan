@@ -30,6 +30,12 @@ class MinimalClientAsync(Node):
         else:
             self.get_logger().info('left saver OK')
 
+        self.right_client = self.create_client(Empty, '/right_saver/save')
+        while not self.left_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('waiting for right saver...')
+        else:
+            self.get_logger().info('right saver OK')
+
         self.req = Empty.Request()
 
     def send_request(self):
@@ -37,6 +43,11 @@ class MinimalClientAsync(Node):
         self.get_logger().info('calling left saver')
         rclpy.spin_until_future_complete(self, self.future)
         self.get_logger().info('got left result!')
+
+        self.future = self.right_client.call_async(self.req)
+        self.get_logger().info('calling right saver')
+        rclpy.spin_until_future_complete(self, self.future)
+        self.get_logger().info('got right result!')
         return True
 
 
