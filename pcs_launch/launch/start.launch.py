@@ -7,16 +7,16 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    robot_name = "pycorescan"
+    this_package_name = 'pcs_launch'
 
     cam_config_1 = os.path.join(
-      get_package_share_directory('pcs_ros'),
+      get_package_share_directory(this_package_name),
       'config',
       'config1.yaml'
     )
 
     cam_config_2 = os.path.join(
-      get_package_share_directory('pcs_ros'),
+      get_package_share_directory(this_package_name),
       'config',
       'config2.yaml'
     )
@@ -65,8 +65,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         left_cam,
-        right_cam,
-        # left_saver,
+        # right_cam,
+        left_saver,
         # right_saver,
         foxglove_bridge
     ])

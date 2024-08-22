@@ -8,7 +8,7 @@ from launch.substitutions import PathJoinSubstitution, TextSubstitution
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    this_package_name = 'pcs_ros'
+    this_package_name = 'pcs_launch'
 
     ld1 = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -20,7 +20,7 @@ def generate_launch_description():
                 ]),
             launch_arguments={
                 'config_file': PathJoinSubstitution([
-                    FindPackageShare('pcs_ros'),
+                    FindPackageShare(this_package_name),
                     'config',
                     'basler1.yaml'
                     ]),
@@ -38,7 +38,7 @@ def generate_launch_description():
                 ]),
             launch_arguments={
                 'config_file': PathJoinSubstitution([
-                    FindPackageShare('pcs_ros'),
+                    FindPackageShare(this_package_name),
                     'config',
                     'basler2.yaml'
                     ]),
