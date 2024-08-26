@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'capture_node = pcs_service.capture:main',
+            'capture_action_server = pcs_service.capture_action_server:main',
             'statuslight = pcs_service.statuslight:main',
         ],
     },
