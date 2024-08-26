@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'capture_node = pcs_service.capture:main',
+            'statuslight = pcs_service.statuslight:main',
         ],
     },
 )

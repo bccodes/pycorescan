@@ -1,4 +1,2 @@
 string label1
 string label2
----
-bool result
