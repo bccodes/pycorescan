@@ -184,3 +184,15 @@ a capture control node which then starts 2 or 4 image saver nodes with the
 passed in label as a parameter. not functional atm because the nodes 
 cannot start under a different rclpy context, i.e. 
 rclpy._rclpy_pybind11.RCLError: failed to create client: rcl node's context is invalid, at ./src/rcl/node.c:428
+
+WEEK 5
+------
+TODO
+- Write action client for the basler driver to make 'capture' service available.
+- Capture service call should take a string message to trigger capture,
+then save an image under that string name in a known path.
+String msg from foxglove -> capture service node -> basler action server
+image msg from basler action -> capture service node -> write out to file ->
+return success
+
+Hope that makes sense later!

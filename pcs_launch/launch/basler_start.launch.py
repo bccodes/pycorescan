@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 def generate_launch_description():
     this_package_name = 'pcs_launch'
 
-    ld1 = IncludeLaunchDescription(
+    basler_ld1 = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
                     FindPackageShare('pylon_ros2_camera_wrapper'),
@@ -28,7 +28,7 @@ def generate_launch_description():
                 }.items()
             )
 
-    ld2 = IncludeLaunchDescription(
+    basler_ld2 = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 PathJoinSubstitution([
                     FindPackageShare('pylon_ros2_camera_wrapper'),
@@ -54,7 +54,7 @@ def generate_launch_description():
 
 
     return LaunchDescription([
-        ld1,
-        ld2,
+        # basler_ld1,
+        basler_ld2,
         bridge
         ])
