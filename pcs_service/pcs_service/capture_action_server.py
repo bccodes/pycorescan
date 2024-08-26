@@ -5,6 +5,8 @@ from rclpy.node import Node
 from pcs_interfaces.msg import CaptureRequest
 from pylon_ros2_camera_interfaces.action import GrabImages
 
+from cv_bridge import CvBridge, CvBridgeError
+import cv2
 
 class CaptureNode(Node):
 
@@ -20,6 +22,7 @@ class CaptureNode(Node):
             CaptureRequest,
             'jobs_done',
             10)
+        self.cv_bridge = CvBridge()
 
     def run_capture_job(self, msg):
         self.active_job = msg
@@ -41,7 +44,7 @@ class CaptureNode(Node):
     def send_goal(self, capture_request):
         goal_msg = GrabImages.Goal()
         goal_msg.exposure_given = True
-        goal_msg.exposure_times = [3500.0]
+        goal_msg.exposure_times = [100000.0]
         self._send_goal_future = self.grab_images_client.send_goal_async(goal_msg)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
@@ -58,12 +61,24 @@ class CaptureNode(Node):
 
     def get_result_callback(self, future):
         result = future.result().result
-        self.get_logger().info('*image came back*...i think')
+        if (len(result.images) > 0):
+            self.get_logger().info('*image came back*...i think')
 
-        print('length of image results: ', len(result.images))
-        print(result.images[0])
-
+        self.get_logger().info('Saving image..')
+        label = self.active_job.label1 + '-' + self.active_job.label2
+        self.save_image(label, result.images[0])
         self.done_publisher.publish(self.active_job)
+
+    def save_image(self, label, image):
+        try:
+            # Convert your ROS Image message to OpenCV2
+            cv2_img = self.cv_bridge.imgmsg_to_cv2(image, "rgb8")
+        except CvBridgeError as e:
+            print(e)
+        else:
+            # Save your OpenCV2 image as a png 
+            cv2.imwrite('/home/ben/nu_ws/' + label + 'camera_image.png', cv2_img)
+
 
 def main(args=None):
     rclpy.init(args=args)
