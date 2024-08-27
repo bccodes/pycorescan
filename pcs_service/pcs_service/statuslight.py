@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import Bool
+from std_msgs.msg import Int32
 
 from pcs_interfaces.msg import CaptureRequest
 
@@ -11,7 +11,7 @@ class StatusLight(Node):
         super().__init__('statuslight')
         # create status bool publisher, true = ready to accept capture request
         self.status_publisher = self.create_publisher(
-            Bool,
+            Int32,
             '/status',
             10)
         timer_period = 0.5  # seconds
@@ -38,19 +38,25 @@ class StatusLight(Node):
 
     def publish_status(self):
         # publish ready true if there are no jobs todo
-        msg = Bool()
+        msg = Int32()
         has_jobs = (len(self.jobs_todo) != 0) # its either true or false
         if has_jobs:
-            msg.data = False
-            self.get_logger().info(f'Current jobs: {self.jobs_todo}',
-            throttle_duration_sec=10)
+            msg.data = 1
+            self.get_logger().info(f'Has jobs: {self.jobs_todo}',
+            throttle_duration_sec=3)
         else: # no jobs duh
-            msg.data = True
+            msg.data = 0
         self.status_publisher.publish(msg)
-        self.get_logger().info(f'Publishing Ready: {msg.data}',
+        self.get_logger().info(f'No Jobs, status {msg.data}',
             throttle_duration_sec=3)
 
     def capture_request_callback(self, msg):
+        # first check that we are not working on a job, and if so return early
+        has_jobs = (len(self.jobs_todo) != 0) # its either true or false
+        if has_jobs:
+            self.get_logger().info(f'Rejected Request, too busy: {msg.label1} {msg.label2}')
+            return
+
         # wait for capture requests and add them to the jobs todo list
         # also publish the new job to /jobs_in
         # msg will be of type 'CaptureRequest', {label1:String, label2:String}

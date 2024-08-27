@@ -1,6 +1,8 @@
 import rclpy
-from rclpy.action import ActionServer, ActionClient
+from rclpy.action import ActionClient
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
+
 
 from pcs_interfaces.msg import CaptureRequest
 from pylon_ros2_camera_interfaces.action import GrabImages
@@ -23,6 +25,7 @@ class CaptureNode(Node):
             'jobs_done',
             10)
         self.cv_bridge = CvBridge()
+        self.timer = self.create_timer(5, clock=self.get_clock())
 
     def run_capture_job(self, msg):
         self.active_job = msg
@@ -36,15 +39,31 @@ class CaptureNode(Node):
         self.grab_images_client.wait_for_server()
         self.get_logger().info(f'Running capture job {job}')
         try:
-            self.send_goal(msg)
+
+            self.lightmode='ring'
+            self.request_images(msg)
+            self.grab_images_client.wait_for_server()
+            # delay = self.create_timer(5)
+            # rclpy.spin_until_future_complete(delay)
+            self.get_logger().warning('here')
+            self.timer.sleep()
+            self.get_logger().warning('222')
+
+            self.lightmode='uv'
+            self.request_images(msg, is_uv=True)
+            self.grab_images_client.wait_for_server()
         except AssertionError:
             self.get_logger().error(f'Bad config, type error')
             self.done_publisher.publish(self.active_job)
 
-    def send_goal(self, msg):
+    def request_images(self, msg, is_uv=False):
         goal_msg = GrabImages.Goal()
         goal_msg.exposure_given = True
-        goal_msg.exposure_times = [msg.exposure1] #100000.0
+        if is_uv:
+            goal_msg.exposure_times = [msg.exposure2] #uv led exposure
+        else:
+            goal_msg.exposure_times = [msg.exposure1] #ring light exposure
+
         self._send_goal_future = self.grab_images_client.send_goal_async(goal_msg)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
@@ -53,7 +72,6 @@ class CaptureNode(Node):
         if not goal_handle.accepted:
             self.get_logger().info('Goal rejected :(')
             return
-
         self.get_logger().info('Goal accepted :)')
 
         self._get_result_future = goal_handle.get_result_async()
@@ -62,12 +80,9 @@ class CaptureNode(Node):
     def get_result_callback(self, future):
         result = future.result().result
         if (len(result.images) > 0):
-            self.get_logger().info('*image came back*...i think')
-
-        self.get_logger().info('Saving image..')
-        label = self.active_job.label1 + '-' + self.active_job.label2
-        self.save_image(label, result.images[0])
-        self.done_publisher.publish(self.active_job)
+            self.get_logger().info('Saving image..')
+            label = self.active_job.label1 + '-' + self.active_job.label2
+            self.save_image(label, result.images[0])
 
     def save_image(self, label, image):
         try:
@@ -77,7 +92,7 @@ class CaptureNode(Node):
             print(e)
         else:
             # Save your OpenCV2 image as a png 
-            cv2.imwrite('/home/ben/nu_ws/' + label + 'camera_image.png', cv2_img)
+            cv2.imwrite('/home/ben/nu_ws/' + label + '-' + self.lightmode +'.png', cv2_img)
 
 
 def main(args=None):
@@ -85,7 +100,9 @@ def main(args=None):
 
     capture_node = CaptureNode()
 
-    rclpy.spin(capture_node)
+    executor = MultiThreadedExecutor()
+
+    rclpy.spin(capture_node, executor)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
