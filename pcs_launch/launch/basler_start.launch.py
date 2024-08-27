@@ -69,5 +69,5 @@ def generate_launch_description():
         basler_ld2,
         bridge,
         capture_node,
-        statuslight
+        # statuslight
         ])
