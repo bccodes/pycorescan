@@ -1,0 +1,99 @@
+{
+  "configById": {
+    "Indicator!1qdndro": {
+      "path": "/status",
+      "style": "background",
+      "fallbackColor": "#bf3434",
+      "fallbackLabel": "Busy",
+      "rules": [
+        {
+          "operator": "=",
+          "rawValue": "True",
+          "color": "#f1751",
+          "label": "Label"
+        }
+      ]
+    },
+    "Publish!1oo5ac6": {
+      "buttonText": "Request Capture",
+      "buttonTooltip": "",
+      "advancedView": true,
+      "value": "{\n  \"label1\": \"123\",\n  \"label2\": \"457\",\n  \"exposure1\": 100000,\n  \"exposure2\": 0\n}",
+      "topicName": "/capture",
+      "datatype": "pcs_interfaces/msg/CaptureRequest",
+      "foxglovePanelTitle": "Request Capture"
+    },
+    "Image!1at8w1": {
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "thetaOffset": 45,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "imageMode": {
+        "imageTopic": "/my_camera/charlie_c/image_raw/compressed"
+      }
+    },
+    "RawMessages!cizxs3": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/my_camera/charlie_c/current_params"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": {
+      "first": "Indicator!1qdndro",
+      "second": "Publish!1oo5ac6",
+      "direction": "column",
+      "splitPercentage": 28.306878306878307
+    },
+    "second": {
+      "first": "Image!1at8w1",
+      "second": "RawMessages!cizxs3",
+      "direction": "row",
+      "splitPercentage": 59.97067448680351
+    },
+    "splitPercentage": 30.89519650655022
+  }
+}

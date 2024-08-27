@@ -41,10 +41,10 @@ class CaptureNode(Node):
             self.get_logger().error(f'Bad config, type error')
             self.done_publisher.publish(self.active_job)
 
-    def send_goal(self, capture_request):
+    def send_goal(self, msg):
         goal_msg = GrabImages.Goal()
         goal_msg.exposure_given = True
-        goal_msg.exposure_times = [100000.0]
+        goal_msg.exposure_times = [msg.exposure1] #100000.0
         self._send_goal_future = self.grab_images_client.send_goal_async(goal_msg)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 

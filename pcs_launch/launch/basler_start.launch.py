@@ -51,10 +51,23 @@ def generate_launch_description():
             executable="foxglove_bridge",
             name="foxglove_bridge"
             )
+    
+    capture_node = Node(
+            package='pcs_service',
+            executable='capture_node',
+            name='capture_node'
+            )
 
+    statuslight = Node(
+            package='pcs_service',
+            executable='statuslight',
+            name='statuslight'
+            )
 
     return LaunchDescription([
         # basler_ld1,
         basler_ld2,
-        bridge
+        bridge,
+        capture_node,
+        statuslight
         ])
