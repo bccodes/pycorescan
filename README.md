@@ -196,3 +196,31 @@ image msg from basler action -> capture service node -> write out to file ->
 return success
 
 Hope that makes sense later!
+
+Progress:
+- Capture node is receiving CaptureRequest messages on /capture and saving
+images to disk. Code added to write commands over serial to control relays also.
+
+WEEK 6
+------
+TODO: 
+- Build power circuit.
+- Write shopping list for remaining components (case, plugs etc)
+- Install OS on seeed odyssey (ubuntu 22.04 desktop)
+
+Power Plan:
+24v 7.5a supply ->
+- female circular plug [STILL NEED]
+<- 24v power rail
+- -> UV LED 1
+- -> UV LED 2
+- -> 12v 3.5a stepdown
+<- 12v power rail
+- -> Ring LED 1
+- -> Ring LED 2
+- -> Basler Cam 1
+- -> Basler Cam 2
+- -> Numato Relay Box
+- -> [optional] Seeed Odyssey
+
+

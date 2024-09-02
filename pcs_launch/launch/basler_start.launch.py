@@ -58,16 +58,10 @@ def generate_launch_description():
             name='capture_node'
             )
 
-    statuslight = Node(
-            package='pcs_service',
-            executable='statuslight',
-            name='statuslight'
-            )
 
     return LaunchDescription([
-        # basler_ld1,
+        basler_ld1,
         basler_ld2,
         bridge,
         capture_node,
-        # statuslight
         ])
