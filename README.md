@@ -223,4 +223,7 @@ Power Plan:
 - -> Numato Relay Box
 - -> [optional] Seeed Odyssey
 
-
+Need to order:
+- male mini-din 4 pin (to replace 24v pack plug)
+- constant current supply for uv led
+- 2x constant current supply for ring led
