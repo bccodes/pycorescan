@@ -210,20 +210,44 @@ TODO:
 
 Power Plan:
 24v 7.5a supply ->
-- female circular plug [STILL NEED]
+- female circular plug
 <- 24v power rail
 - -> UV LED 1
 - -> UV LED 2
+- -> Numato Relay Box
 - -> 12v 3.5a stepdown
 <- 12v power rail
 - -> Ring LED 1
 - -> Ring LED 2
 - -> Basler Cam 1
 - -> Basler Cam 2
-- -> Numato Relay Box
-- -> [optional] Seeed Odyssey
+
+12v 2a supply ->
+- -> Seeed Odyssey
 
 Need to order:
 - male mini-din 4 pin (to replace 24v pack plug)
 - constant current supply for uv led
 - 2x constant current supply for ring led
+
+WEEK 7
+------
+Done recently:
+- Replaced connector on 24v power pack
+
+Things to do today:
+- Wire up 24v and 12v circuits
+- Order barcode scanner and RCDs (constant current sources)
+https://au.element14.com/opticon/c37-usb/barcode-ccd-usb-black/dp/2536869
+- Investigate ros2 CameraInfo
+- Acquire figure-8 plug for power pack
+https://www.jaycar.com.au/2pin-fig-8-mains-plug-to-iec-c7-female-1-8m-figure-8/p/PS4115
+- Write parts list in PARTS.md
+
+Tasks to do soon:
+- Test LED switching with usb relays
+- Complete power circuit with remaining RCDs and safety loop
+- Add barcode scanner ROS functionality
+- Put it in a box
+- WIN
+
