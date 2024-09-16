@@ -1,25 +1,10 @@
 {
   "configById": {
-    "Indicator!3axzhi4": {
-      "path": "/ready_status.data",
-      "style": "background",
-      "fallbackColor": "#cd2b2b",
-      "fallbackLabel": "Not Ready",
-      "rules": [
-        {
-          "operator": "=",
-          "rawValue": "true",
-          "color": "#68e24a",
-          "label": "Ready"
-        }
-      ],
-      "foxglovePanelTitle": "Status"
-    },
     "Publish!1oo5ac6": {
       "buttonText": "Apply Settings",
       "buttonTooltip": "",
       "advancedView": true,
-      "value": "{\n  \"label\": \"hi\",\n  \"exposure1\": 300000,\n  \"exposure2\": 200000\n}",
+      "value": "{\n  \"core_id\": \"\",\n  \"exposure_ring\": 0,\n  \"exposure_uv\": 0\n}",
       "topicName": "/update_settings",
       "datatype": "pcs_interfaces/msg/UpdateSettings",
       "foxglovePanelTitle": "Update Settings",
@@ -29,11 +14,26 @@
       "buttonText": "Request Images",
       "buttonTooltip": "",
       "advancedView": true,
-      "value": "{\n  \"data\": \"123\"\n}",
+      "value": "{\n  \"segment_id\": \"\"\n}",
       "topicName": "/capture",
-      "datatype": "std_msgs/msg/String",
+      "datatype": "pcs_interfaces/msg/CaptureRequest",
       "buttonColor": "#ffc140",
       "foxglovePanelTitle": "Capture Segment"
+    },
+    "Indicator!3axzhi4": {
+      "path": "/ready_status.data",
+      "style": "background",
+      "fallbackColor": "#d68686",
+      "fallbackLabel": "Busy",
+      "rules": [
+        {
+          "operator": "=",
+          "rawValue": "true",
+          "color": "#7eba87",
+          "label": "Ready"
+        }
+      ],
+      "foxglovePanelTitle": "Status"
     },
     "Image!16cqlkn": {
       "cameraState": {
@@ -124,7 +124,9 @@
       }
     },
     "RosOut!4a19r8m": {
-      "searchTerms": [],
+      "searchTerms": [
+        "capture_node"
+      ],
       "minLogLevel": 1,
       "nameFilter": {}
     }
@@ -138,25 +140,25 @@
     "first": {
       "direction": "row",
       "first": {
-        "first": "Indicator!3axzhi4",
+        "first": "Publish!1oo5ac6",
         "second": {
-          "first": "Publish!1oo5ac6",
-          "second": "Publish!1bgkq5o",
+          "first": "Publish!1bgkq5o",
+          "second": "Indicator!3axzhi4",
           "direction": "column",
-          "splitPercentage": 52.932176986212184
+          "splitPercentage": 62.05842797779966
         },
         "direction": "column",
-        "splitPercentage": 23.610445062537526
+        "splitPercentage": 48.35192940950798
       },
       "second": {
         "first": "Image!16cqlkn",
         "second": "Image!1at8w1",
         "direction": "column"
       },
-      "splitPercentage": 51.007554565403105
+      "splitPercentage": 46.98450942973806
     },
     "second": "RosOut!4a19r8m",
     "direction": "column",
-    "splitPercentage": 70.10050251256281
+    "splitPercentage": 73.14814814814815
   }
 }
