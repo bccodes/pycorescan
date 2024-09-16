@@ -19,17 +19,20 @@ import cv2
 
 import serial
 import os
+import time
 
+SIMULATE_RELAYS = True
+SIMULATE_CAMERAS = True
 
 class CaptureNode(Node):
     def __init__(self):
         super().__init__('capture_node')
-        self.label_prefix = ""
-        self.exposure1 = 300000
-        self.exposure2 = 200000
+        self.label_prefix = 'nolabel'
+        self.exposure_ring = 300000.0
+        self.exposure_uv = 200000.0
 
-        self.job_subscription = self.create_subscription(
-            CaptureRequest,
+        self.trigger_sub = self.create_subscription(
+            String,
             '/capture',
             self.job_in_callback,
             10)
@@ -38,17 +41,20 @@ class CaptureNode(Node):
             '/update_settings',
             self.update_settings_callback,
             10)
-        self.cv_bridge = CvBridge()
-        self.timer = self.create_timer(0.2, self.timer_callback) # period in seconds 
-        self.tasks_todo = []
-        self.busy = False
         self.status_publisher = self.create_publisher(
             Bool,
-            '/status',
+            '/ready_status',
             10)
 
-        # self.has_serial = self.trySerialConnect()
-        self.has_serial = True
+        self.cv_bridge = CvBridge()
+        self.timer = self.create_timer(0.2, self.timer_callback) # period
+        self.tasks_todo = []
+        self.busy = False
+
+        if SIMULATE_RELAYS:
+            self.has_serial = True
+        else:
+            self.has_serial = self.try_serial_connect()
 
         self.usb_path = self.get_usb_storage_path()
         if self.usb_path:
@@ -141,57 +147,73 @@ class CaptureNode(Node):
 
 
     def create_folder(self, path, name="corescans"):
-        folder_path = os.path.join(path, name)
+        date_string = time.strftime('%d_%m_%Y')
+        self.folder_path = os.path.join(path, name, date_string)
         try:
             # with open(folder_path, 'w') as f:
             #     pass  # This will create an empty file
-            os.makedirs(name, exist_ok=True)
-            self.get_logger().info(f"Working directory: {folder_path}")
+            if not os.path.isdir(self.folder_path):
+                os.makedirs(self.folder_path, exist_ok=True)
+            self.get_logger().info(f"Working directory: {self.folder_path}")
         except Exception as e:
-            self.get_logger().error(f"Failed to create folder at {folder_path}: {e}")
+            self.get_logger().error(f"Failed to create folder at {self.folder_path}: {e}")
             self.has_storage = False
 
 
-    def job_in_callback(self, msg):
-        """Every time a message hits /capture, check if busy, and if not,
-        append the necessary tasks to tasks_todo."""
-        if not self.tasks_todo:
-            self.active_job = (msg.label1 + '-' + msg.label2)
-            self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'ring'})
-            self.tasks_todo.append({'type': 'capture',
-                                    'side': 'left',
-                                    'label': self.active_job + '-ring',
-                                    'exposure': msg.exposure1})
-            self.tasks_todo.append({'type': 'capture',
-                                    'side': 'right',
-                                    'label': self.active_job + '-ring',
-                                    'exposure': msg.exposure1})
-            self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'uv'})
-            self.tasks_todo.append({'type': 'capture',
-                                    'side': 'left',
-                                    'label': self.active_job + '-uv',
-                                    'exposure': msg.exposure2})
-            self.tasks_todo.append({'type': 'capture',
-                                    'side': 'right',
-                                    'label': self.active_job + '-uv',
-                                    'exposure': msg.exposure2})
-            self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'ring'})
-        
-        self.get_logger().info(str(self.tasks_todo))
+    def touch_file(self, label):
+        self.file_path = os.path.join(self.folder_path, label)
+        try:
+            with open(self.file_path, 'w') as f:
+                pass  # create an empty file
+        except Exception as e:
+            self.get_logger().error(f"Failed to touch file at {self.file_path}: {e}")
+            self.has_storage = False
 
 
     def update_settings_callback(self, msg):
         if self.busy:
             self.get_logger().warn('cannot change settings while busy. try again')
         else:
-            self.label_prefix = msg.label
-            self.exposure1 = msg.exposure1
-            self.exposure2 = msg.exposure2
+            if msg.label_prefix:
+                self.label_prefix = msg.label_prefix
+            else:
+                self.label_prefix = "nolabel"
+            self.exposure_ring = msg.exposure_ring
+            self.exposure_uv = msg.exposure_uv
             self.get_logger().info('successfully updated settings')
-            self.get_logger().info(f'label: {msg.label}, e1: {msg.exposure1}, e2: {msg.exposure2}')
+            self.get_logger().info(f'label: {msg.label_prefix}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
+
+
+    def job_in_callback(self, msg):
+        """Every time a message hits /capture, check if busy, and if not,
+        append the necessary tasks to tasks_todo."""
+        if not self.tasks_todo:
+            self.active_job = (self.label_prefix + '-' + msg.data)
+            self.tasks_todo.append({'type': 'lights',
+                                    'mode': 'ring'})
+            self.tasks_todo.append({'type': 'capture',
+                                    'side': 'left',
+                                    'label': self.active_job + '-ring',
+                                    'exposure': self.exposure_ring})
+            self.tasks_todo.append({'type': 'capture',
+                                    'side': 'right',
+                                    'label': self.active_job + '-ring',
+                                    'exposure': self.exposure_ring})
+            self.tasks_todo.append({'type': 'lights',
+                                    'mode': 'uv'})
+            self.tasks_todo.append({'type': 'capture',
+                                    'side': 'left',
+                                    'label': self.active_job + '-uv',
+                                    'exposure': self.exposure_uv})
+            self.tasks_todo.append({'type': 'capture',
+                                    'side': 'right',
+                                    'label': self.active_job + '-uv',
+                                    'exposure': self.exposure_uv})
+            self.tasks_todo.append({'type': 'lights',
+                                    'mode': 'ring'})
+        
+        self.get_logger().info(str(self.tasks_todo))
+
 
     def run_task(self, task):
         """Something about this just seems wrong and I'm sorry"""
@@ -199,11 +221,9 @@ class CaptureNode(Node):
             case 'lights':
                 match task['mode']:
                     case 'ring':
-                        self.switch_relay(1, True)
-                        self.switch_relay(2, False)
+                        self.switch_lights('ring', sim_only=SIMULATE_RELAYS)
                     case 'uv':
-                        self.switch_relay(1, False)
-                        self.switch_relay(2, True)
+                        self.switch_lights('uv', sim_only=SIMULATE_RELAYS)
                     case _:
                         self.get_logger().warn('something went wrong bad task type')
                 self.busy = False
@@ -211,12 +231,43 @@ class CaptureNode(Node):
                 self.active_label = task['label']
                 self.active_exposure = task['exposure']
                 self.active_side = task['side']
-                self.send_capture_goal()
-                # Stay busy at this point so the scheduler will not accept tasks
-                # until the current awaited image is saved.
+                time_string = time.strftime('%H-%M-%S')
+                if not SIMULATE_CAMERAS:
+                    self.send_capture_goal()
+                    # Stay busy at this point so the scheduler will not accept
+                    # tasks until the current awaited image is saved.
+                else:
+                    file_label = str(f'{self.active_label}-{self.active_side}-{time_string}')
+                    self.touch_file(file_label)
+                    self.get_logger().info(f'simulated capture: {file_label}.png')
+                    self.busy = False
             case _:
                 self.get_logger().warn('something went wrong bad task type')
                 self.busy = False
+
+
+    def switch_lights(self, light_mode, sim_only=False):
+        if not sim_only:
+            match light_mode:
+                case 'ring':
+                    self.switch_relay(1, True)
+                    self.switch_relay(2, False)
+                case 'uv':
+                    self.switch_relay(1, False)
+                    self.switch_relay(2, True)
+                case _:
+                    self.get_logger().warn('something went wrong bad task type')
+
+
+    def switch_relay(self, relay_num, state):
+        cmd = 'relay ' + ('on ' if state else 'off ') + str(relay_num) 
+        self.get_logger().info('sending relay command: ' + cmd)
+        
+        try:
+            self.serPort.write(cmd.encode())
+        except:
+            self.has_serial = False
+
 
     def send_capture_goal(self):
         # start client for pylon wrapper
@@ -276,14 +327,6 @@ class CaptureNode(Node):
             print(e)
         self.busy=False
 
-    def switch_relay(self, relay_num, state):
-        cmd = 'relay ' + ('on ' if state else 'off ') + str(relay_num) 
-        self.get_logger().info('sending relay command: ' + cmd)
-        
-        try:
-            self.serPort.write(cmd.encode())
-        except:
-            self.has_serial = False
 
 def main(args=None):
     rclpy.init(args=args)

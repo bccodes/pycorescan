@@ -1,3 +1,3 @@
-string label
-float32 exposure1
-float32 exposure2
+string label_prefix
+float32 exposure_ring
+float32 exposure_uv

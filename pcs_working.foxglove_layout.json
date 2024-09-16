@@ -1,27 +1,83 @@
 {
   "configById": {
-    "Indicator!1qdndro": {
-      "path": "/status",
+    "Indicator!3axzhi4": {
+      "path": "/ready_status.data",
       "style": "background",
-      "fallbackColor": "#bf3434",
-      "fallbackLabel": "Busy",
+      "fallbackColor": "#cd2b2b",
+      "fallbackLabel": "Not Ready",
       "rules": [
         {
           "operator": "=",
-          "rawValue": "True",
-          "color": "#f1751",
-          "label": "Label"
+          "rawValue": "true",
+          "color": "#68e24a",
+          "label": "Ready"
         }
-      ]
+      ],
+      "foxglovePanelTitle": "Status"
     },
     "Publish!1oo5ac6": {
-      "buttonText": "Request Capture",
+      "buttonText": "Apply Settings",
       "buttonTooltip": "",
       "advancedView": true,
-      "value": "{\n  \"label1\": \"123\",\n  \"label2\": \"457\",\n  \"exposure1\": 100000,\n  \"exposure2\": 0\n}",
+      "value": "{\n  \"label\": \"hi\",\n  \"exposure1\": 300000,\n  \"exposure2\": 200000\n}",
+      "topicName": "/update_settings",
+      "datatype": "pcs_interfaces/msg/UpdateSettings",
+      "foxglovePanelTitle": "Update Settings",
+      "buttonColor": "#ec8cf6"
+    },
+    "Publish!1bgkq5o": {
+      "buttonText": "Request Images",
+      "buttonTooltip": "",
+      "advancedView": true,
+      "value": "{\n  \"data\": \"123\"\n}",
       "topicName": "/capture",
-      "datatype": "pcs_interfaces/msg/CaptureRequest",
-      "foxglovePanelTitle": "Request Capture"
+      "datatype": "std_msgs/msg/String",
+      "buttonColor": "#ffc140",
+      "foxglovePanelTitle": "Capture Segment"
+    },
+    "Image!16cqlkn": {
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [
+          0,
+          0,
+          0
+        ],
+        "targetOffset": [
+          0,
+          0,
+          0
+        ],
+        "targetOrientation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "thetaOffset": 45,
+        "fovy": 45,
+        "near": 0.5,
+        "far": 5000
+      },
+      "followMode": "follow-pose",
+      "scene": {},
+      "transforms": {},
+      "topics": {},
+      "layers": {},
+      "publish": {
+        "type": "point",
+        "poseTopic": "/move_base_simple/goal",
+        "pointTopic": "/clicked_point",
+        "poseEstimateTopic": "/initialpose",
+        "poseEstimateXDeviation": 0.5,
+        "poseEstimateYDeviation": 0.5,
+        "poseEstimateThetaDeviation": 0.26179939
+      },
+      "imageMode": {
+        "imageTopic": "/my_camera/some_node/image_raw/compressed"
+      }
     },
     "Image!1at8w1": {
       "cameraState": {
@@ -67,12 +123,10 @@
         "imageTopic": "/my_camera/charlie_c/image_raw/compressed"
       }
     },
-    "RawMessages!cizxs3": {
-      "diffEnabled": false,
-      "diffMethod": "custom",
-      "diffTopicPath": "",
-      "showFullMessageForDiff": false,
-      "topicPath": "/my_camera/charlie_c/current_params"
+    "RosOut!4a19r8m": {
+      "searchTerms": [],
+      "minLogLevel": 1,
+      "nameFilter": {}
     }
   },
   "globalVariables": {},
@@ -81,19 +135,28 @@
     "speed": 1
   },
   "layout": {
-    "direction": "row",
     "first": {
-      "first": "Indicator!1qdndro",
-      "second": "Publish!1oo5ac6",
-      "direction": "column",
-      "splitPercentage": 28.306878306878307
-    },
-    "second": {
-      "first": "Image!1at8w1",
-      "second": "RawMessages!cizxs3",
       "direction": "row",
-      "splitPercentage": 59.97067448680351
+      "first": {
+        "first": "Indicator!3axzhi4",
+        "second": {
+          "first": "Publish!1oo5ac6",
+          "second": "Publish!1bgkq5o",
+          "direction": "column",
+          "splitPercentage": 52.932176986212184
+        },
+        "direction": "column",
+        "splitPercentage": 23.610445062537526
+      },
+      "second": {
+        "first": "Image!16cqlkn",
+        "second": "Image!1at8w1",
+        "direction": "column"
+      },
+      "splitPercentage": 51.007554565403105
     },
-    "splitPercentage": 30.89519650655022
+    "second": "RosOut!4a19r8m",
+    "direction": "column",
+    "splitPercentage": 70.10050251256281
   }
 }
