@@ -174,14 +174,14 @@ class CaptureNode(Node):
         if self.busy:
             self.get_logger().warn('cannot change settings while busy. try again')
         else:
-            if msg.label_prefix:
-                self.label_prefix = msg.label_prefix
+            if msg.core_id:
+                self.label_prefix = msg.core_id
             else:
                 self.label_prefix = "nolabel"
             self.exposure_ring = msg.exposure_ring
             self.exposure_uv = msg.exposure_uv
             self.get_logger().info('successfully updated settings')
-            self.get_logger().info(f'label: {msg.label_prefix}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
+            self.get_logger().info(f'label: {msg.core_id}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
 
 
     def job_in_callback(self, msg):
