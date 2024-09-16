@@ -32,7 +32,7 @@ class CaptureNode(Node):
         self.exposure_uv = 200000.0
 
         self.trigger_sub = self.create_subscription(
-            String,
+            CaptureRequest,
             '/capture',
             self.job_in_callback,
             10)
@@ -188,7 +188,11 @@ class CaptureNode(Node):
         """Every time a message hits /capture, check if busy, and if not,
         append the necessary tasks to tasks_todo."""
         if not self.tasks_todo:
-            self.active_job = (self.label_prefix + '-' + msg.data)
+            if not msg.segment_id:
+                label_suffix = 'noid'
+            else:
+                label_suffix = msg.segment_id
+            self.active_job = (self.label_prefix + '-' + label_suffix)
             self.tasks_todo.append({'type': 'lights',
                                     'mode': 'ring'})
             self.tasks_todo.append({'type': 'capture',
@@ -262,7 +266,6 @@ class CaptureNode(Node):
     def switch_relay(self, relay_num, state):
         cmd = 'relay ' + ('on ' if state else 'off ') + str(relay_num) 
         self.get_logger().info('sending relay command: ' + cmd)
-        
         try:
             self.serPort.write(cmd.encode())
         except:
