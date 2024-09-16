@@ -251,3 +251,35 @@ Tasks to do soon:
 - Put it in a box
 - WIN
 
+WEEK 8
+------
+Done recently:
+- Tested switching LEDs with usb relay
+- Configured wifi AP on Seeed Odyssey with fixed IP 192.168.0.1
+
+To do today:
+- Write ROS2 code to receive trigger message from barcode scanner
+
+[ROS2 Design:]
+
+Node:       CaptureNode
+Role:       Receives settings updates and trigger messages, then saves images
+System:     - Numato USB serial relay controller
+            - USB mass storage write
+Messages:   (in) CaptureRequest(segment_id: string)
+            (in) ConfigUpdate(core_id: string, exposure1: int, exposure2: int) 
+            (out) StatusChatter(ready: bool, msg: string)
+
+Node:       TriggerNode
+            - USB barcode scanner read
+Role:       Sends CaptureRequest messages every time barcode scanner is used
+Messages:   (out) CaptureRequest(segment_id: string)
+
+Launch: 2x Pylon Ros2 Basler Camera driver nodes (one per camera)
+Action: GrabImages(exposures: int[])
+
+The user dashboard (currently foxglove studio) will provide compressed streams
+from both cameras, as well as the ability to change settings and send capture
+requests. It will also display the ready state and message.
+
+

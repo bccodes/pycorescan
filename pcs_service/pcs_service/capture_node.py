@@ -10,25 +10,33 @@ from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
-from std_msgs.msg import Bool
-from pcs_interfaces.msg import CaptureRequest
+from std_msgs.msg import Bool, String
+from pcs_interfaces.msg import CaptureRequest, UpdateSettings
 from pylon_ros2_camera_interfaces.action import GrabImages
 
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-import sys
 import serial
-
+import os
 
 
 class CaptureNode(Node):
     def __init__(self):
         super().__init__('capture_node')
+        self.label_prefix = ""
+        self.exposure1 = 300000
+        self.exposure2 = 200000
+
         self.job_subscription = self.create_subscription(
             CaptureRequest,
             '/capture',
             self.job_in_callback,
+            10)
+        self.settings_sub = self.create_subscription(
+            UpdateSettings,
+            '/update_settings',
+            self.update_settings_callback,
             10)
         self.cv_bridge = CvBridge()
         self.timer = self.create_timer(0.2, self.timer_callback) # period in seconds 
@@ -38,10 +46,61 @@ class CaptureNode(Node):
             Bool,
             '/status',
             10)
-        self.hasSerial = self.trySerialConnect()
-        
 
-    def trySerialConnect(self):
+        # self.has_serial = self.trySerialConnect()
+        self.has_serial = True
+
+        self.usb_path = self.get_usb_storage_path()
+        if self.usb_path:
+            self.has_storage = True
+        else:
+            self.has_storage = False
+        
+        self.status_msg = ""
+
+
+    def timer_callback(self):
+        """Every timer cycle, check if busy and if not, start a task.
+        Then publish status."""
+        ready_state = Bool() # status is true if ready to capture
+        ready_state.data = False
+        
+        if not self.has_serial: # check for numato device 
+            self.status_msg = "check relay box connection"
+            self.has_serial = self.try_serial_connect()
+        elif not self.has_storage: # check for usb storage device
+            self.status_msg = "check usb storage connection"
+            self.usb_path = self.get_usb_storage_path()
+            if self.usb_path:
+                self.has_storage = True
+        elif self.tasks_todo and not self.busy: # start a new task
+            # get a capture task and run it
+            self.busy = True
+            next_task = self.tasks_todo.pop(0)
+            self.get_logger().info(f'running task: {next_task}')
+            self.run_task(next_task)
+        elif not self.tasks_todo: # ready
+            if os.access(self.usb_path, os.W_OK):
+                ready_state.data = True
+                self.get_logger().info(f'ready to capture', throttle_duration_sec=10)
+                self.status_msg = ""
+            else: # we lost the usb?
+                self.has_storage = False
+        else: # busy
+            if not self.active_job:
+                self.get_logger().info(f'something went wrong... no active job but busy?', throttle_duration_sec=1)
+            self.get_logger().info(f'working on job {self.active_job}', throttle_duration_sec=1)
+
+        # publish status
+        self.status_publisher.publish(ready_state)
+
+        if ready_state.data and self.status_msg:
+            self.get_logger().info(self.status_msg, throttle_duration_sec=3)
+        elif self.status_msg:
+            self.get_logger().warn(self.status_msg, throttle_duration_sec=3)
+
+
+    def try_serial_connect(self):
         # open serial port for relay control
         try:
             self.serPort = serial.Serial('/dev/ttyACM0', 19200, timeout=3)
@@ -53,35 +112,44 @@ class CaptureNode(Node):
                 self.serPort.write(cmd.encode())
             success = True
         except:
-            self.get_logger().error('could not access /dev/ttyACM0, is numato board connected?', throttle_duration_sec=5)
+            # self.get_logger().error('could not access /dev/ttyACM0, is numato board connected?', throttle_duration_sec=5)
             success = False
         return success
 
+    
+    def get_usb_storage_path(self):
+        """check if any usb storage device is found and writable
+        return the path of the usb, or an empty string if not found"""
 
-    def timer_callback(self):
-        """Every timer cycle, check if busy and if not, start a task.
-        Then publish status."""
-        ready_state = Bool() # status is true if ready to capture
-        ready_state.data = False
-        # if not self.hasSerial:
-        #     self.hasSerial = self.trySerialConnect()
-        if self.tasks_todo and not self.busy:
-            # get a capture task and run it
-            self.busy = True
-            next_task = self.tasks_todo.pop(0)
-            self.get_logger().info(f'running task: {next_task}')
-            self.run_task(next_task)
-        elif not self.tasks_todo:
-            # change status message to ready
-            ready_state.data = True
-            self.get_logger().info(f'ready to capture', throttle_duration_sec=10)
-        else:
-            # busy
-            if not self.active_job:
-                self.get_logger().info(f'something went wrong... no active job but busy?', throttle_duration_sec=1)
-            self.get_logger().info(f'working on job {self.active_job}', throttle_duration_sec=1)
-        # publish status message
-        self.status_publisher.publish(ready_state)
+        # self.get_logger().info('searching for usb')
+        # Check if the /media/ directory exists
+        media_path = '/media/'
+        if not os.path.exists(media_path):
+            return ""
+        # Iterate through all directories in /media/
+        for device in os.listdir(media_path):
+            device_path = os.path.join(media_path, device)
+        # Check for any subdirectory (usually the label) within the mounted device
+            subdirs = [os.path.join(device_path, subdir) for subdir in os.listdir(device_path)]
+            # Look for writable subdirectory
+            for subdir in subdirs:
+                if os.path.isdir(subdir) and os.access(subdir, os.W_OK):
+                    # self.get_logger().info(f'found usb storage at {subdir}')
+                    self.create_folder(subdir)
+                    return subdir
+        return ""
+
+
+    def create_folder(self, path, name="corescans"):
+        folder_path = os.path.join(path, name)
+        try:
+            # with open(folder_path, 'w') as f:
+            #     pass  # This will create an empty file
+            os.makedirs(name, exist_ok=True)
+            self.get_logger().info(f"Working directory: {folder_path}")
+        except Exception as e:
+            self.get_logger().error(f"Failed to create folder at {folder_path}: {e}")
+            self.has_storage = False
 
 
     def job_in_callback(self, msg):
@@ -114,6 +182,16 @@ class CaptureNode(Node):
         
         self.get_logger().info(str(self.tasks_todo))
 
+
+    def update_settings_callback(self, msg):
+        if self.busy:
+            self.get_logger().warn('cannot change settings while busy. try again')
+        else:
+            self.label_prefix = msg.label
+            self.exposure1 = msg.exposure1
+            self.exposure2 = msg.exposure2
+            self.get_logger().info('successfully updated settings')
+            self.get_logger().info(f'label: {msg.label}, e1: {msg.exposure1}, e2: {msg.exposure2}')
 
     def run_task(self, task):
         """Something about this just seems wrong and I'm sorry"""
@@ -205,7 +283,7 @@ class CaptureNode(Node):
         try:
             self.serPort.write(cmd.encode())
         except:
-            self.hasSerial = False
+            self.has_serial = False
 
 def main(args=None):
     rclpy.init(args=args)
