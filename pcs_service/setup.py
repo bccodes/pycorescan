@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'capture_node = pcs_service.capture_node:main',
+            'barcode_scanner_node = pcs_service.barcode_scanner_node:main'
         ],
     },
 )
