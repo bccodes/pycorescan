@@ -1,8 +1,8 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
+from pcs_interfaces.msg import CaptureRequest
 
-# import keyboard
 import sys
 import select
 
@@ -14,8 +14,8 @@ class BarcodeScannerNode(Node):
     def __init__(self):
         super().__init__('barcode_scanner_node')
         self.publisher_ = self.create_publisher(
-                String,
-                '/barcodes',
+                CaptureRequest,
+                '/capture',
                 10)
         self.get_logger().info('Barcode scanner node up bebe')
 
@@ -33,10 +33,10 @@ class BarcodeScannerNode(Node):
                 char = sys.stdin.read(1)
                 # print(char)
                 if char == '\r' or char == '\n':
-                    msg = String()
-                    msg.data = self.barcode_data.strip()
+                    msg = CaptureRequest()
+                    msg.segment_id = self.barcode_data.strip()
                     self.publisher_.publish(msg)
-                    self.get_logger().info(f'published barcode: {msg.data}')
+                    self.get_logger().info(f'published barcode: {msg.segment_id}')
                     self.barcode_data = ''
                 else:
                     self.barcode_data += char
