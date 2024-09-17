@@ -1,13 +1,8 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
 from pcs_interfaces.msg import CaptureRequest
 
-import sys
-import select
-
-import tty
-import termios
+import evdev
 
 
 class BarcodeScannerNode(Node):
@@ -17,34 +12,46 @@ class BarcodeScannerNode(Node):
                 CaptureRequest,
                 '/capture',
                 10)
-        self.get_logger().info('Barcode scanner node up bebe')
+        self.get_logger().info('Barcode scanner node up')
 
-        # store terminal settings
-        self.old_terminal_settings = termios.tcgetattr(sys.stdin)
-        tty.setcbreak(sys.stdin.fileno())
+        self.device_path = '/dev/input/by-id/usb-OPTO-E_Barcode_Device-event-kbd'
+        
+        self.create_timer(0.2, self.timer_callback)
+        self.has_scanner = False
 
-        # self.create_timer(0.1, self.scan_barcode)
         self.barcode_data = ''
 
+    def timer_callback(self):
+        if not self.has_scanner:
+            try:
+                self.device = evdev.InputDevice(self.device_path)
+                self.get_logger().info(f'Connected to device {self.device.name}')
+                self.listen_to_scanner()
+            except Exception as e:
+                self.get_logger().error(f'Could not connect to device: {e}', throttle_duration_sec=3)
+                return
 
-    def scan_barcode(self):
-        while rclpy.ok():
-            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                char = sys.stdin.read(1)
-                # print(char)
-                if char == '\r' or char == '\n':
-                    msg = CaptureRequest()
-                    msg.segment_id = self.barcode_data.strip()
-                    self.publisher_.publish(msg)
-                    self.get_logger().info(f'published barcode: {msg.segment_id}')
-                    self.barcode_data = ''
-                else:
-                    self.barcode_data += char
 
-    
+    def listen_to_scanner(self):
+        for event in self.device.read_loop():
+            if event.type == evdev.ecodes.EV_KEY:
+                key_event = evdev.categorize(event)
+                if key_event.keystate == evdev.KeyEvent.key_down:
+                    keycode = key_event.keycode
+
+                    if keycode == 'KEY_ENTER':
+                        msg = CaptureRequest()
+                        msg.segment_id = self.barcode_data.strip()
+                        self.publisher_.publish(msg)
+                        self.get_logger().info(f'published barcode: {msg.segment_id}')
+                        self.barcode_data = ''
+                    else:
+                        char = evdev.ecodes.KEY[key_event.scancode]
+                        self.barcode_data += char.replace("KEY_", "").lower()
+
+
     def destroy_node(self):
-        # restore terminal settings
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.old_terminal_settings)
+        self.device.close()
         super().destroy_node()
 
 
@@ -53,8 +60,7 @@ def main(args=None):
     node = BarcodeScannerNode()
 
     try:
-        # rclpy.spin(node)
-        node.scan_barcode()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         node.get_logger().info('Shutting down barcode scanner node')
     finally:
