@@ -282,4 +282,26 @@ The user dashboard (currently foxglove studio) will provide compressed streams
 from both cameras, as well as the ability to change settings and send capture
 requests. It will also display the ready state and message.
 
+[BACKEND INSTALLATION PROCESS]
+Planned steps:
+- install ubuntu 24.04
+- install ros2
+- install pylon
+- clone repo
+- build ros workspace
+- disable ufw
+- add hotspot connection with fixed IP
+- add scanner udev rule
+- (todo: setup autolaunch on boot with system service)
 
+[FRONTEND INSTALLATION PROCESS]
+Planned steps:
+- install foxglove-studio
+- connect to wifi AP
+- open foxglove on 192.168.0.1:8765
+- open browser on 192.168.0.1:80
+
+[HARDWARE INSTALLATION PROCESS]
+240v(24v(uv1, uv2, relaybox, 12v(ring1, ring2, cam1, cam2)))
+240v(12v(backend pc))
+pc(usb hub(relaybox, cam1, cam2))
