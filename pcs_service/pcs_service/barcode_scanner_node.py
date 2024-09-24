@@ -28,7 +28,7 @@ class BarcodeScannerNode(Node):
                 self.get_logger().info(f'Connected to device {self.device.name}')
                 self.listen_to_scanner()
             except Exception as e:
-                self.get_logger().error(f'Could not connect to device: {e}', throttle_duration_sec=3)
+                self.get_logger().warning(f'Could not connect to device: {e}', throttle_duration_sec=3)
                 return
 
 

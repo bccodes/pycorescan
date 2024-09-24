@@ -1,5 +1,5 @@
 # This node currently does everything:
-# Scheduling, Image grabbing, Saving, Relay control and GPIO control.
+# Scheduling, Image grabbing, Saving, Relay control and (todo) GPIO control.
 # 
 # Subscribes to: /capture (CaptureRequest)
 # Action Client to: /camera_name/grab_images_raw (GrabImages)
@@ -10,7 +10,7 @@ from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
-from std_msgs.msg import Bool, String
+from std_msgs.msg import Bool
 from pcs_interfaces.msg import CaptureRequest, UpdateSettings
 from pylon_ros2_camera_interfaces.action import GrabImages
 
@@ -21,7 +21,7 @@ import serial
 import os
 import time
 
-SIMULATE_RELAYS = True
+SIMULATE_RELAYS = False
 SIMULATE_CAMERAS = True
 
 class CaptureNode(Node):

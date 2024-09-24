@@ -58,10 +58,16 @@ def generate_launch_description():
             name='capture_node'
             )
 
+    barcode_scanner_node = Node(
+            package='pcs_service',
+            executable='barcode_scanner_node',
+            name='barcode_scanner_node'
+            )
 
     return LaunchDescription([
         basler_ld1,
         basler_ld2,
         bridge,
         capture_node,
+        barcode_scanner_node
         ])
