@@ -284,16 +284,17 @@ requests. It will also display the ready state and message.
 
 [BACKEND INSTALLATION PROCESS]
 Planned steps:
-- install ubuntu 24.04
-- install ros2
-- install pylon ros2 driver & deps
-- clone pycorescan repo & install deps
+- install ubuntu 22.04 (24.04 failed install on Seeed Odyssey)
+- apt install ros-humble-desktop ros-dev-tools ros2-humble-foxglove-bridge python3-pip apache2
+- install pylon ros2 camera driver & deps
+- clone pycorescan repo (and sudo pip install evdev and serial)
 - build ros workspace & add source to bashrc
+- copy udev rule for barcode scanner to /etc/udev/rules.d/
 - add hotspot connection with fixed IP via NetworkManager
-- setup apache server
-- add udev rule for barcode scanner
-- disable ufw
-- (todo: setup autolaunch on boot with system service)
+- setup apache server by replacing /etc/apache2/apache2.conf
+- sudo chmod 755 /media/raptor
+- disable ufw with systemctl
+- add service to systemctl
 
 [FRONTEND INSTALLATION PROCESS]
 Planned steps:
