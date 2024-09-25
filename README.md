@@ -286,12 +286,13 @@ requests. It will also display the ready state and message.
 Planned steps:
 - install ubuntu 24.04
 - install ros2
-- install pylon
-- clone repo
-- build ros workspace
+- install pylon ros2 driver & deps
+- clone pycorescan repo & install deps
+- build ros workspace & add source to bashrc
+- add hotspot connection with fixed IP via NetworkManager
+- setup apache server
+- add udev rule for barcode scanner
 - disable ufw
-- add hotspot connection with fixed IP
-- add scanner udev rule
 - (todo: setup autolaunch on boot with system service)
 
 [FRONTEND INSTALLATION PROCESS]
