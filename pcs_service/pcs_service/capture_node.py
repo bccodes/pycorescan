@@ -194,40 +194,68 @@ class CaptureNode(Node):
                 label_suffix = msg.segment_id
             self.active_job = (self.label_prefix + '-' + label_suffix)
             self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'ring'})
+                                    'mode': 'ring',
+                                    'side': 'left'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'left',
                                     'label': self.active_job + '-ring',
                                     'exposure': self.exposure_ring})
+            self.tasks_todo.append({'type': 'lights',
+                                    'mode': 'ring',
+                                    'side': 'right'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'right',
                                     'label': self.active_job + '-ring',
                                     'exposure': self.exposure_ring})
             self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'uv'})
+                                    'mode': 'uv',
+                                    'side': 'left'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'left',
                                     'label': self.active_job + '-uv',
                                     'exposure': self.exposure_uv})
+            self.tasks_todo.append({'type': 'lights',
+                                    'mode': 'uv',
+                                    'side': 'right'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'right',
                                     'label': self.active_job + '-uv',
                                     'exposure': self.exposure_uv})
             self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'ring'})
+                                    'mode': 'preview'})
         
         self.get_logger().info(str(self.tasks_todo))
 
 
     def run_task(self, task):
-        """Something about this just seems wrong and I'm sorry"""
+        """Get a task which may either switch lights or request capture"""
         match task['type']:
             case 'lights':
                 match task['mode']:
                     case 'ring':
-                        self.switch_lights('ring', sim_only=SIMULATE_RELAYS)
+                        match task['side']:
+                            case 'left':
+                                self.switch_relay(1, True)
+                                self.switch_relay(2, False)
+                                self.switch_relay(3, False)
+                                self.switch_relay(4, False)
+                            case 'right':
+                                self.switch_relay(1, False)
+                                self.switch_relay(2, True)
+                                self.switch_relay(3, False)
+                                self.switch_relay(4, False)
                     case 'uv':
-                        self.switch_lights('uv', sim_only=SIMULATE_RELAYS)
+                        match task['side']:
+                            case 'left':
+                                self.switch_relay(1, False)
+                                self.switch_relay(2, False)
+                                self.switch_relay(3, True)
+                                self.switch_relay(4, False)
+                            case 'right':
+                                self.switch_relay(1, False)
+                                self.switch_relay(2, False)
+                                self.switch_relay(3, False)
+                                self.switch_relay(4, True)
                     case _:
                         self.get_logger().warn('something went wrong bad task type')
                 self.busy = False
@@ -250,26 +278,14 @@ class CaptureNode(Node):
                 self.busy = False
 
 
-    def switch_lights(self, light_mode, sim_only=False):
-        if not sim_only:
-            match light_mode:
-                case 'ring':
-                    self.switch_relay(1, True)
-                    self.switch_relay(2, False)
-                case 'uv':
-                    self.switch_relay(1, False)
-                    self.switch_relay(2, True)
-                case _:
-                    self.get_logger().warn('something went wrong bad task type')
-
-
     def switch_relay(self, relay_num, state):
-        cmd = 'relay ' + ('on ' if state else 'off ') + str(relay_num) 
-        self.get_logger().info('sending relay command: ' + cmd)
-        try:
-            self.serPort.write(cmd.encode())
-        except:
-            self.has_serial = False
+        if not SIMULATE_RELAYS:
+            cmd = 'relay ' + ('on ' if state else 'off ') + str(relay_num) 
+            self.get_logger().info('sending relay command: ' + cmd)
+            try:
+                self.serPort.write(cmd.encode())
+            except:
+                self.has_serial = False
 
 
     def send_capture_goal(self):
