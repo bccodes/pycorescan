@@ -11,13 +11,12 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
 from std_msgs.msg import Bool
-from pcs_interfaces.msg import CaptureRequest, UpdateSettings
+from pcs_interfaces.msg import CaptureRequest, UpdateSettings, SwitchLights
 from pylon_ros2_camera_interfaces.action import GrabImages
 
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 
-import serial
 import os
 import time
 
@@ -45,16 +44,15 @@ class CaptureNode(Node):
             Bool,
             '/ready_status',
             10)
+        self.switch_lights_publisher = self.create_publisher(
+            SwitchLights,
+            '/switch_lights',
+            10)
 
         self.cv_bridge = CvBridge()
         self.timer = self.create_timer(0.2, self.timer_callback) # period
         self.tasks_todo = []
         self.busy = False
-
-        if SIMULATE_RELAYS:
-            self.has_serial = True
-        else:
-            self.has_serial = self.try_serial_connect()
 
         self.usb_path = self.get_usb_storage_path()
         if self.usb_path:
@@ -71,10 +69,7 @@ class CaptureNode(Node):
         ready_state = Bool() # status is true if ready to capture
         ready_state.data = False
         
-        if not self.has_serial: # check for numato device 
-            self.status_msg = "check relay box connection"
-            self.has_serial = self.try_serial_connect()
-        elif not self.has_storage: # check for usb storage device
+        if not self.has_storage: # check for usb storage device
             self.status_msg = "check usb storage connection"
             self.usb_path = self.get_usb_storage_path()
             if self.usb_path:
@@ -105,23 +100,6 @@ class CaptureNode(Node):
         elif self.status_msg:
             self.get_logger().warn(self.status_msg, throttle_duration_sec=3)
 
-
-    def try_serial_connect(self):
-        # open serial port for relay control
-        try:
-            self.serPort = serial.Serial('/dev/ttyACM0', 19200, timeout=3)
-            # zero all relays
-            for i in range(8):
-                relay_num = str(i + 1)
-                self.get_logger().info('zeroing relay ' + relay_num)
-                cmd = 'relay off ' + relay_num + '\n\r'
-                self.serPort.write(cmd.encode())
-            success = True
-        except:
-            # self.get_logger().error('could not access /dev/ttyACM0, is numato board connected?', throttle_duration_sec=5)
-            success = False
-        return success
-
     
     def get_usb_storage_path(self):
         """check if any usb storage device is found and writable
@@ -150,8 +128,6 @@ class CaptureNode(Node):
         date_string = time.strftime('%d_%m_%Y')
         self.folder_path = os.path.join(path, name, date_string)
         try:
-            # with open(folder_path, 'w') as f:
-            #     pass  # This will create an empty file
             if not os.path.isdir(self.folder_path):
                 os.makedirs(self.folder_path, exist_ok=True)
             self.get_logger().info(f"Working directory: {self.folder_path}")
@@ -231,34 +207,12 @@ class CaptureNode(Node):
         """Get a task which may either switch lights or request capture"""
         match task['type']:
             case 'lights':
-                match task['mode']:
-                    case 'ring':
-                        match task['side']:
-                            case 'left':
-                                self.switch_relay(1, True)
-                                self.switch_relay(2, False)
-                                self.switch_relay(3, False)
-                                self.switch_relay(4, False)
-                            case 'right':
-                                self.switch_relay(1, False)
-                                self.switch_relay(2, True)
-                                self.switch_relay(3, False)
-                                self.switch_relay(4, False)
-                    case 'uv':
-                        match task['side']:
-                            case 'left':
-                                self.switch_relay(1, False)
-                                self.switch_relay(2, False)
-                                self.switch_relay(3, True)
-                                self.switch_relay(4, False)
-                            case 'right':
-                                self.switch_relay(1, False)
-                                self.switch_relay(2, False)
-                                self.switch_relay(3, False)
-                                self.switch_relay(4, True)
-                    case _:
-                        self.get_logger().warn('something went wrong bad task type')
+                msg = SwitchLights()
+                msg.mode = task['mode']
+                msg.side = task['side']
+                self.switch_lights_publisher.publish(msg) 
                 self.busy = False
+
             case 'capture':
                 self.active_label = task['label']
                 self.active_exposure = task['exposure']
@@ -273,23 +227,14 @@ class CaptureNode(Node):
                     self.touch_file(file_label)
                     self.get_logger().info(f'simulated capture: {file_label}.png')
                     self.busy = False
+
             case _:
                 self.get_logger().warn('something went wrong bad task type')
                 self.busy = False
 
 
-    def switch_relay(self, relay_num, state):
-        if not SIMULATE_RELAYS:
-            cmd = 'relay ' + ('on ' if state else 'off ') + str(relay_num) 
-            self.get_logger().info('sending relay command: ' + cmd)
-            try:
-                self.serPort.write(cmd.encode())
-            except:
-                self.has_serial = False
-
-
     def send_capture_goal(self):
-        # start client for pylon wrapper
+        # make an action client for the pylon camera 
         match self.active_side:
             case 'left':
                 self._cam_client = ActionClient(
@@ -306,7 +251,6 @@ class CaptureNode(Node):
             case _:
                 self.get_logger().warn('something went wrong no active_side')
                 self.busy = False
-
 
         # send capture request
         try:
