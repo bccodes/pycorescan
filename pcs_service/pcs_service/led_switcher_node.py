@@ -28,35 +28,39 @@ class LightSwitcherNode(Node):
                 10)
 
         self.status_timer = self.create_timer(
-                0.2,
+                1,
                 self.timer_callback)
                 
 
     def timer_callback(self):
-        if not self.has_serial:
-            self.try_serial_connect()
+        self.has_serial = self.try_serial_connect()
 
     
     def try_serial_connect(self):
-        # open serial port for relay control
         try:
             self.serPort = serial.Serial('/dev/ttyACM0', 19200, timeout=3)
-            # zero all relays
-            for i in range(8):
-                relay_num = str(i + 1)
-                self.get_logger().info('zeroing relay ' + relay_num)
-                cmd = 'relay off ' + relay_num + '\n\r'
-                self.serPort.write(cmd.encode())
+            self.get_logger().info('Numato Relay Box Connected.', throttle_duration_sec=5)
             success = True
-        except:
+        except Exception as e:
             self.get_logger().error('could not access numato board, check connection', throttle_duration_sec=5)
+            # print(e)
             success = False
         return success
 
+
+    def zero_all_relays(self):
+        for i in range(8):
+            relay_num = str(i + 1)
+            self.get_logger().info('zeroing relay ' + relay_num)
+            cmd = 'relay off ' + relay_num + '\n\r'
+            self.serPort.write(cmd.encode())
     
+
     def switch_lights_callback(self, msg):
+        self.get_logger().info('switching lights...')
         task = {'mode': msg.mode,
                 'side': msg.side}
+        print(task)
 
         match task['mode']:
             case 'ring':

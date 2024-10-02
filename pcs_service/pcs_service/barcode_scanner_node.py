@@ -16,7 +16,7 @@ class BarcodeScannerNode(Node):
 
         self.device_path = '/dev/input/by-id/usb-OPTO-E_Barcode_Device-event-kbd'
         
-        self.create_timer(0.2, self.timer_callback)
+        self.create_timer(1, self.timer_callback)
         self.has_scanner = False
 
         self.barcode_data = ''
@@ -28,7 +28,7 @@ class BarcodeScannerNode(Node):
                 self.get_logger().info(f'Connected to device {self.device.name}')
                 self.listen_to_scanner()
             except Exception as e:
-                self.get_logger().warning(f'Could not connect to device: {e}', throttle_duration_sec=3)
+                self.get_logger().warning(f'Could not connect to device: {e}', throttle_duration_sec=5)
                 return
 
 

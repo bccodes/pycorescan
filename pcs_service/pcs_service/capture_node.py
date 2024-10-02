@@ -21,7 +21,9 @@ import os
 import time
 
 SIMULATE_RELAYS = False
-SIMULATE_CAMERAS = True
+SIMULATE_CAMERAS = False
+HIGHEST_EXPOSURE = 400000
+LOWEST_EXPOSURE = 100
 
 class CaptureNode(Node):
     def __init__(self):
@@ -154,6 +156,11 @@ class CaptureNode(Node):
                 self.label_prefix = msg.core_id
             else:
                 self.label_prefix = "nolabel"
+            
+            for exp in (msg.exposure_ring, msg.exposure_uv):
+                if exp > HIGHEST_EXPOSURE or exp < LOWEST_EXPOSURE:
+                    self.get_logger().error(f'Rejected invalid exposure setting: {exp}')
+                    return
             self.exposure_ring = msg.exposure_ring
             self.exposure_uv = msg.exposure_uv
             self.get_logger().info('successfully updated settings')
@@ -198,7 +205,8 @@ class CaptureNode(Node):
                                     'label': self.active_job + '-uv',
                                     'exposure': self.exposure_uv})
             self.tasks_todo.append({'type': 'lights',
-                                    'mode': 'preview'})
+                                    'mode': 'preview',
+                                    'side': ''})
         
         self.get_logger().info(str(self.tasks_todo))
 
@@ -217,13 +225,13 @@ class CaptureNode(Node):
                 self.active_label = task['label']
                 self.active_exposure = task['exposure']
                 self.active_side = task['side']
-                time_string = time.strftime('%H-%M-%S')
+                self.time_string = time.strftime('%H-%M-%S')
                 if not SIMULATE_CAMERAS:
                     self.send_capture_goal()
                     # Stay busy at this point so the scheduler will not accept
                     # tasks until the current awaited image is saved.
                 else:
-                    file_label = str(f'{self.active_label}-{self.active_side}-{time_string}')
+                    file_label = str(f'{self.active_label}-{self.active_side}-{self.time_string}')
                     self.touch_file(file_label)
                     self.get_logger().info(f'simulated capture: {file_label}.png')
                     self.busy = False
@@ -283,8 +291,8 @@ class CaptureNode(Node):
     def save_image(self, image):
         self.get_logger().info('Saving image ' + self.active_label)
         try:
-            cv2_img = self.cv_bridge.imgmsg_to_cv2(image, "rgb8")
-            cv2.imwrite('/home/ben/nu_ws/' + self.active_label + '-' + self.active_side + '.png', cv2_img)
+            cv2_img = self.cv_bridge.imgmsg_to_cv2(image, "bgr8")
+            cv2.imwrite(self.folder_path + '/' + self.active_label + '-' + self.active_side + self.time_string + '.png', cv2_img)
         except CvBridgeError as e:
             self.get_logger().error('CVBridgeError')
             print(e)
