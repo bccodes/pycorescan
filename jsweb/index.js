@@ -1,8 +1,7 @@
-// Connecting to ROS
+// ROS2 STATUS
 var ros = new ROSLIB.Ros();
 ros.connect('ws://localhost:9090');
 
-// Get the html status object
 var statuslabel = document.getElementById("status");
 
 var reconnect_timer = setInterval(reconnect_callback, 3000);
@@ -24,14 +23,48 @@ function reconnect_callback() {
 	}
 }
 
+
+// UPDATE SETTINGS
+var update_settings_topic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/update_settings',  // Replace with your new ROS topic name
+    messageType: 'pcs_interfaces/UpdateSettings'  // Replace with your new message type
+});
+
+// Add event listener to the button
+document.getElementById('settingsBtn').addEventListener('click', function() {
+    // Get values from the three input fields
+    var inputE1 = document.getElementById('inputE1').value;
+    var inputE2 = document.getElementById('inputE2').value;
+    var inputPrefix = document.getElementById('inputPrefix').value;
+
+    // Ensure none of the input fields are empty
+    if (inputE1.trim() !== "" && inputE2.trim() !== "" && inputPrefix.trim() !== "") {
+        // Create a ROS message with e1, e2, and prefix
+        var message = new ROSLIB.Message({
+            e1: inputE1,
+            e2: inputE2,
+            prefix: inputPrefix
+        });
+
+        // Publish the message
+        update_settings_topic.publish(message);
+        console.log('Message published:', message);
+    } else {
+        console.log('Please fill in all the fields.');
+    }
+});
+
+
+// CAPTURE REQUEST
 var capture_topic = new ROSLIB.Topic({
 	ros: ros,
 	name: '/capture',  // Replace with your ROS topic name
 	messageType: 'pcs_interfaces/CaptureRequest'  // Replace with your message type
 });
 
-document.getElementById('publishBtn').addEventListener('click', function() {
-	var textInput = document.getElementById('messageInput').value;
+document.getElementById('captureBtn').addEventListener('click', function() {
+	var textInput = document.getElementById('captureInput').value;
 	if (textInput.trim() !== "") {
 		var message = new ROSLIB.Message({
 			segment_id: textInput
@@ -43,7 +76,8 @@ document.getElementById('publishBtn').addEventListener('click', function() {
 	}
 });
 
-// Update the image frame
+
+// IMAGE PREVIEW
 var jpegTopic = new ROSLIB.Topic({
     ros : ros,
     name : '/image_raw/compressed',
@@ -56,3 +90,74 @@ jpegTopic.subscribe(function(message) {
 	document.getElementById('image').setAttribute('src', imagedata);
 });
 
+
+// FILE BROWSER
+// back button
+function backBtn() {
+	var iframe = document.getElementById('iframe');
+	iframe.contentWindow.history.back();
+}
+
+// scale images inside the file tree iframe
+// Wait for the iframe to load
+document.getElementById('iframe').onload = function() {
+	var iframe = document.getElementById('iframe');
+	var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+	// Add CSS to scale images inside the iframe
+	var style = iframeDoc.createElement('style');
+	style.innerHTML = `
+		img {
+			max-width: 100%;
+			height: auto;
+			display: block;
+			margin: 0 auto;
+		}
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+		h1, hr { 
+            display: none; /* Hide the directory header and line */
+        }
+	`;
+	iframeDoc.head.appendChild(style);
+
+	// Get the height of the iframe content
+	// var contentHeight = iframeDoc.body.scrollHeight;
+	var contentHeight = Math.max(iframeDoc.body.scrollHeight, iframeDoc.documentElement.scrollHeight);
+
+	// Set the iframe height to the content height
+	iframe.style.height = contentHeight + 'px';
+};
+
+// ROS2 LOGGING
+// Define the ROS topic for log messages
+var logTopic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/rosout',  // ROS 2 log topic
+    messageType: 'rcl_interfaces/Log'  // Update this to the correct message type if necessary
+});
+
+// Subscribe to the log topic
+logTopic.subscribe(function(message) {
+    // Get the message string
+    var logMessage = message.msg;  // Adjust according to your message structure
+
+    // Create a new div element for the log message
+    var messageDiv = document.createElement('div');
+    messageDiv.textContent = logMessage;  // Set the message text
+
+    // Prepend the new message to the log container
+    var logContainer = document.getElementById('logContainer');
+    logContainer.prepend(messageDiv);  // Prepend so the most recent messages appear at the top
+
+    // Scroll to the top to show the latest message
+    logContainer.scrollTop = 0;
+
+	// Optional: Limit the number of messages displayed to avoid overflow
+	while (logContainer.childElementCount > 100) {  // Adjust the number as needed
+		logContainer.removeChild(logContainer.lastChild);
+	}
+});
