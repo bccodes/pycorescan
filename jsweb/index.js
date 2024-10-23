@@ -5,10 +5,10 @@ ros.connect('ws://localhost:9090');
 // Get the html status object
 var statuslabel = document.getElementById("status");
 
-var reconnect_timer = setInterval(interval_callback, 3000);
+var reconnect_timer = setInterval(reconnect_callback, 3000);
 var attempts = 5;
 
-function interval_callback() {
+function reconnect_callback() {
 	if (ros.isConnected) {
 		statuslabel.innerHTML = 'connected'; 
 		statuslabel.style.color = 'green';
@@ -42,3 +42,17 @@ document.getElementById('publishBtn').addEventListener('click', function() {
 		console.log('No message entered.');
 	}
 });
+
+// Update the image frame
+var jpegTopic = new ROSLIB.Topic({
+    ros : ros,
+    name : '/image_raw/compressed',
+    messageType : 'sensor_msgs/CompressedImage'
+});
+
+jpegTopic.subscribe(function(message) {
+	var imagedata = "data:image/jpeg;base64," + message.data;
+	console.log(message.format);
+	document.getElementById('image').setAttribute('src', imagedata);
+});
+
