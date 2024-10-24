@@ -46,12 +46,6 @@ def generate_launch_description():
                 }.items()
             )
 
-    bridge = Node(
-            package="foxglove_bridge",
-            executable="foxglove_bridge",
-            name="foxglove_bridge"
-            )
-    
     capture_node = Node(
             package='pcs_service',
             executable='capture_node',
@@ -70,11 +64,22 @@ def generate_launch_description():
             name='led_switcher_node'
             )
 
+    # bridge = Node(
+    #         package="foxglove_bridge",
+    #         executable="foxglove_bridge",
+    #         name="foxglove_bridge"
+    #         )
+    bridge = Node(
+            package="rosbridge_server",
+            executable="rosbridge_websocket",
+            name="rosbridge_websocket"
+            )
+    
     return LaunchDescription([
         basler_ld1,
         basler_ld2,
-        bridge,
         capture_node,
         barcode_scanner_node,
-        led_switcher_node
+        led_switcher_node,
+        bridge,
         ])

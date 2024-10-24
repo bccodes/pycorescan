@@ -150,21 +150,30 @@ class CaptureNode(Node):
 
     def update_settings_callback(self, msg):
         if self.busy:
-            self.get_logger().warn('cannot change settings while busy. try again')
+            self.get_logger().warn('cannot change settings while busy')
+            return
+        if msg.core_id:
+            self.label_prefix = msg.core_id
         else:
-            if msg.core_id:
-                self.label_prefix = msg.core_id
-            else:
-                self.label_prefix = "nolabel"
-            
-            for exp in (msg.exposure_ring, msg.exposure_uv):
-                if exp > HIGHEST_EXPOSURE or exp < LOWEST_EXPOSURE:
-                    self.get_logger().error(f'Rejected invalid exposure setting: {exp}')
+            self.label_prefix = "nolabel"
+
+        # validate exposures
+        for exp in (msg.exposure_ring, msg.exposure_uv):
+            if exp != '':
+                try:
+                    if exp > HIGHEST_EXPOSURE or exp < LOWEST_EXPOSURE:
+                        self.get_logger().error(f'invalid exposure: {exp}')
+                        return
+                except:
+                    self.get_logger().error(f'invalid exposure: {exp}')
                     return
+
+        if msg.exposure_ring:
             self.exposure_ring = msg.exposure_ring
+        if msg.exposure_uv:
             self.exposure_uv = msg.exposure_uv
-            self.get_logger().info('successfully updated settings')
-            self.get_logger().info(f'label: {msg.core_id}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
+        self.get_logger().info('successfully updated settings')
+        # self.get_logger().info(f'label: {msg.core_id}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
 
 
     def job_in_callback(self, msg):

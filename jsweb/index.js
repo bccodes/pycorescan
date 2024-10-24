@@ -38,42 +38,32 @@ document.getElementById('settingsBtn').addEventListener('click', function() {
     var inputE2 = document.getElementById('inputE2').value;
     var inputPrefix = document.getElementById('inputPrefix').value;
 
-    // Ensure none of the input fields are empty
-    if (inputE1.trim() !== "" && inputE2.trim() !== "" && inputPrefix.trim() !== "") {
-        // Create a ROS message with e1, e2, and prefix
-        var message = new ROSLIB.Message({
-            e1: inputE1,
-            e2: inputE2,
-            prefix: inputPrefix
-        });
+	// Create a ROS message with e1, e2, and prefix
+	var message = new ROSLIB.Message({
+		exposure_ring: inputE1 * 1,
+		exposure_uv: inputE2 * 1,
+		core_id: inputPrefix
+	});
 
-        // Publish the message
-        update_settings_topic.publish(message);
-        console.log('Message published:', message);
-    } else {
-        console.log('Please fill in all the fields.');
-    }
+	// Publish the message
+	update_settings_topic.publish(message);
+	console.log('Message published:', message);
 });
 
 
 // CAPTURE REQUEST
 var capture_topic = new ROSLIB.Topic({
 	ros: ros,
-	name: '/capture',  // Replace with your ROS topic name
-	messageType: 'pcs_interfaces/CaptureRequest'  // Replace with your message type
+	name: '/capture',  // replace with your ros topic name
+	messagetype: 'pcs_interfaces/CaptureRequest'  // replace with your message type
 });
 
 document.getElementById('captureBtn').addEventListener('click', function() {
 	var textInput = document.getElementById('captureInput').value;
-	if (textInput.trim() !== "") {
-		var message = new ROSLIB.Message({
-			segment_id: textInput
-		});
-		capture_topic.publish(message);
-		console.log('Message published: ' + message.segment_id);
-	} else {
-		console.log('No message entered.');
-	}
+	var message = new ROSLIB.Message();
+	message.segment_id = textInput.trim();
+	capture_topic.publish(message);
+	console.log('Message published:', message);
 });
 
 
