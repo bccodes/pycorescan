@@ -1,7 +1,7 @@
 from launch_ros.substitutions import FindPackageShare
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, TextSubstitution
 
@@ -9,6 +9,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     this_package_name = 'pcs_launch'
+    www_directory = '/home/ben/repos/pycorescan/www/'
 
     basler_ld1 = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
@@ -64,16 +65,16 @@ def generate_launch_description():
             name='led_switcher_node'
             )
 
-    # bridge = Node(
-    #         package="foxglove_bridge",
-    #         executable="foxglove_bridge",
-    #         name="foxglove_bridge"
-    #         )
     bridge = Node(
             package="rosbridge_server",
             executable="rosbridge_websocket",
             name="rosbridge_websocket"
             )
+
+    http_server = ExecuteProcess(
+            cmd = ['python3', '-m', 'http.server', '8000', '--directory', www_directory],
+            output='screen',
+    )
     
     return LaunchDescription([
         basler_ld1,
@@ -82,4 +83,5 @@ def generate_launch_description():
         barcode_scanner_node,
         led_switcher_node,
         bridge,
+        http_server,
         ])
