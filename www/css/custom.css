@@ -1,0 +1,26 @@
+.top-panel {
+    padding: 10px 20px;           /* Padding for the top panel */
+}
+
+.logo {
+    height: 50px;
+    /* width: auto; */
+}
+
+.square {
+    width: 100%;
+    padding-bottom: 100%;
+    position: relative;
+	border: 1px solid;
+}
+
+.square img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
