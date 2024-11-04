@@ -307,3 +307,51 @@ Planned steps:
 240v(24v(uv1, uv2, relaybox, 12v(ring1, ring2, cam1, cam2)))
 240v(12v(backend pc))
 pc(usb hub(relaybox, cam1, cam2))
+
+WEEK 9
+------
+- wrote the barcode scanner module with python and evdev library
+- udev rule in linux is also added to allow us to take ownership of the scanner
+
+WEEK 10
+-------
+- bunch of learning assignments at work
+
+WEEK 11
+-------
+- brought the model home to continue working on hardware
+- tbh not as much progress here as i would have liked
+
+WEEK 12
+-------
+- working on frontend redesign
+
+WEEK 13
+-------
+- redesigned front end in html/css/js (had to learn lots to do this)
+
+WEEK 14
+-------
+- replaced apache2 with python http.server
+- specced and acquired enclosure and cable glands
+
+WEEK 15
+-------
+Changes to backend:
+- no longer using apache server
+Changes to frontend:
+- no longer using foxglove studio
+- user will connect to ap then open browser on 192.168.0.1.8000 instead
+
+Todo this week:
+- finish hardware (put it in enclosure)
+- add better capability and progress notifications to frontend
+
+[Frontend changes]
+- add ros2 connected coloured bar at top
+- coloured boxes for availability of:
+    barcode scanner
+    usb storage
+    cameras (x2)
+    numato box
+

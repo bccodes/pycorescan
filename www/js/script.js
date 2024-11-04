@@ -2,28 +2,37 @@
 var ros = new ROSLIB.Ros();
 ros.connect('ws://localhost:9090');
 
-var statuslabel = document.getElementById("status");
+function updateROSStatus() {
+    var rosStatusBar = document.getElementById('ros-status-bar');
+    var rosStatusLabel = document.getElementById('ros-status-label');
+	var attempts = 10;
+    
+    if (ros.isConnected) {
+        rosStatusBar.classList.remove('bg-secondary');
+        rosStatusBar.classList.remove('bg-danger');
+        rosStatusBar.classList.remove('bg-warning');
+		rosStatusLabel.innerText = 'ROS2 Connected'
+        rosStatusBar.classList.add('bg-success');
+    } else if (attempts > 0) {
+        rosStatusBar.classList.remove('bg-secondary');
+        rosStatusBar.classList.remove('bg-danger');
+        rosStatusBar.classList.remove('bg-danger');
+		rosStatusLabel.innerText = 'Attempting to reconnect...'
+        rosStatusBar.classList.add('bg-warning');
 
-var reconnect_timer = setInterval(reconnect_callback, 3000);
-var attempts = 5;
-reconnect_callback();
-
-function reconnect_callback() {
-	if (ros.isConnected) {
-		statuslabel.innerHTML = 'OK'; 
-		statuslabel.style.color = 'green';
-	} else if (attempts > 0) {
+		attempts = attempts - 1;
 		ros.connect('ws://localhost:9090');
-		statuslabel.innerHTML = 'attempting to connect...'; 
-		statuslabel.style.color = 'orange';
-		attempts -= 1;
-	} else {
-		statuslabel.innerHTML = 'lost connection, please refresh'; 
-		statuslabel.style.color = 'red';
-		clearInterval(reconnect_timer);
+
+    } else {
+        rosStatusBar.classList.remove('bg-secondary');
+        rosStatusBar.classList.remove('bg-danger');
+        rosStatusBar.classList.remove('bg-warning');
+		rosStatusLabel.innerText = 'Lost Connection, Please Refresh'
+        rosStatusBar.classList.add('bg-danger');
 	}
 }
 
+setInterval(updateROSStatus, 1500);
 
 // IMAGE PREVIEW
 var leftTopic = new ROSLIB.Topic({
@@ -107,7 +116,8 @@ function refreshIframe() {
     var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
 	function adjustIframeHeight() {
-		var contentHeight = Math.max(iframeDoc.body.scrollHeight, iframeDoc.documentElement.scrollHeight);
+		var contentHeight = document.getElementById('preview_frame').scrollHeight;
+		// var contentHeight = Math.max(iframeDoc.body.scrollHeight, iframeDoc.documentElement.scrollHeight);
 		iframe.style.height = contentHeight + 'px';
 	}
 

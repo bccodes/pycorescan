@@ -14,22 +14,24 @@
 		<link rel="stylesheet" href="css/custom.css">
 	</head>
 	<body>
-		<div class="container-fluid top-panel bg-primary text-white mb-4">
+		<div class="container-fluid top-panel bg-primary text-white mb-0">
 			<div class="row align-items-center">
-				<!-- Logo on the left -->
 				<div class="mt-1 mb-1 col-auto">
 					<img src="svg/CSIRO_Logo.svg" alt="CSIRO Logo" class="logo">
 				</div>
 
-				<!-- Centered header text -->
 				<div class="col text-center mt-2">
-					<h1 class="">Core Scanner v1.0</h1>
+					<h1 class="">CSIRO Core Scanner</h1>
 				</div>
 			</div>
 		</div>
-		<div class="container text-center">
 
-			<div class="mb-4">
+		<div id="ros-status-bar" class="bg-secondary container-fluid text-white text-center">
+			<h6 id="ros-status-label" class="mt-0 mb-0">ROS2 Connecting...</h6>
+		</div>
+
+		<div class="container text-center">
+			<div id="preview_frame" class="mt-4 mb-4">
 				<h1>Live Preview</h1>
 				<div class="row">
 					<div class="col-6 d-flex justify-content-center">
@@ -76,7 +78,7 @@
 
 			<div class="mb-4">
 				<h1>ROS2 Logging</h1>
-				<p>ROS2 Connection: <span id="status" style="font-weight: bold;"></span></p>
+				<!-- <p>ROS2 Connection: <span id="status" style="font-weight: bold;"></span></p> -->
 
 				<div id="logContainer" style="border: 1px solid; height: 10em; overflow-y: scroll; padding: 10px; background-color: white;">
 					<!-- Log messages will be displayed here -->
