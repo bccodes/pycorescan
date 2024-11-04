@@ -28,12 +28,12 @@ function reconnect_callback() {
 // IMAGE PREVIEW
 var leftTopic = new ROSLIB.Topic({
     ros : ros,
-    name : '/image_raw/compressed',
+    name : '/my_camera/some_node/image_raw/compressed',
     messageType : 'sensor_msgs/CompressedImage'
 });
 var rightTopic = new ROSLIB.Topic({
     ros : ros,
-    name : '/image_raw/compressed',
+    name : '/my_camera/charlie_c/image_raw/compressed',
     messageType : 'sensor_msgs/CompressedImage'
 });
 
@@ -181,7 +181,7 @@ window.addEventListener('load', function() {
 	refreshIframe(); // Resize the iframe on back navigation
 	refreshBtn();
 });
-// var refreshTimer = setInterval(refreshBtn, 5000);
+// var refreshTimer = setInterval(refreshBtn, 1000);
 
 
 // ROS2 LOGGING
