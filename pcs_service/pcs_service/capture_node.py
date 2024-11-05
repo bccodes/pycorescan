@@ -10,9 +10,9 @@ from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String, Float32
 from pcs_interfaces.msg import CaptureRequest, UpdateSettings, SwitchLights
-from pylon_ros2_camera_interfaces.action import GrabImages
+# from pylon_ros2_camera_interfaces.action import GrabImages
 
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -28,23 +28,48 @@ LOWEST_EXPOSURE = 100
 class CaptureNode(Node):
     def __init__(self):
         super().__init__('capture_node')
-        self.label_prefix = 'nolabel'
+        # self.label_prefix = 'nolabel'
+        self.declare_parameter('prefix', 'noprefix')
+        self.declare_parameter('exp_ring', 300000.0)
+        self.declare_parameter('exp_uv', 200000.0)
+
         self.exposure_ring = 300000.0
         self.exposure_uv = 200000.0
 
         self.trigger_sub = self.create_subscription(
             CaptureRequest,
-            '/capture',
+            'capture',
             self.job_in_callback,
             10)
-        self.settings_sub = self.create_subscription(
-            UpdateSettings,
-            '/update_settings',
-            self.update_settings_callback,
-            10)
+        # self.settings_sub = self.create_subscription(
+        #     UpdateSettings,
+        #     '/update_settings',
+        #     self.update_settings_callback,
+        #     10)
+        self.prefix_sub = self.create_subscription(
+                String,
+                'set_prefix',
+                self.set_prefix_callback,
+                10)
+        self.exp_ring_sub = self.create_subscription(
+                Float32,
+                'set_exposure_ring',
+                self.set_exp_ring_callback,
+                10)
+        self.exp_uv_sub = self.create_subscription(
+                Float32,
+                'set_exposure_uv',
+                self.set_exp_uv_callback,
+                10)
+
+
         self.status_publisher = self.create_publisher(
             Bool,
-            '/ready_status',
+            'ready_status',
+            10)
+        self.storage_publisher = self.create_publisher(
+            Bool,
+            'has_storage',
             10)
         self.switch_lights_publisher = self.create_publisher(
             SwitchLights,
@@ -65,11 +90,60 @@ class CaptureNode(Node):
         self.status_msg = ""
 
 
+    def set_prefix_callback(self, msg):
+        if self.busy:
+            self.get_logger().warn('cannot change settings while busy')
+            return
+        my_new_param = rclpy.parameter.Parameter(
+                'prefix',
+                rclpy.Parameter.Type.STRING,
+                msg.data
+                )
+        self.set_parameters([my_new_param])
+
+    def set_exp_ring_callback(self, msg):
+        if self.busy:
+            self.get_logger().warn('cannot change settings while busy')
+            return
+        try:
+            data = float(msg.data)
+            assert (data <= HIGHEST_EXPOSURE)
+            assert (data >= LOWEST_EXPOSURE)
+        except:
+            self.get_logger().error(f'invalid exposure for ring: {msg.data}')
+            my_new_param = rclpy.parameter.Parameter(
+                    'exp_ring',
+                    rclpy.Parameter.Type.DOUBLE,
+                    msg.data
+                    )
+            self.set_parameters([my_new_param])
+
+    def set_exp_uv_callback(self, msg):
+        if self.busy:
+            self.get_logger().warn('cannot change settings while busy')
+            return
+        try:
+            data = float(msg.data)
+            assert (data <= HIGHEST_EXPOSURE)
+            assert (data >= LOWEST_EXPOSURE)
+        except:
+            self.get_logger().error(f'invalid exposure for uv: {msg.data}')
+            my_new_param = rclpy.parameter.Parameter(
+                    'exp_uv',
+                    rclpy.Parameter.Type.DOUBLE,
+                    msg.data
+                    )
+            self.set_parameters([my_new_param])
+
+
     def timer_callback(self):
         """Every timer cycle, check if busy and if not, start a task.
         Then publish status."""
         ready_state = Bool() # status is true if ready to capture
         ready_state.data = False
+
+        usb_state = Bool()
+        
         
         if not self.has_storage: # check for usb storage device
             self.status_msg = "check usb storage connection"
@@ -95,12 +169,14 @@ class CaptureNode(Node):
             self.get_logger().info(f'working on job {self.active_job}', throttle_duration_sec=1)
 
         # publish status
+        usb_state.data = self.has_storage
+        self.storage_publisher.publish(usb_state)
         self.status_publisher.publish(ready_state)
 
-        if ready_state.data and self.status_msg:
-            self.get_logger().info(self.status_msg, throttle_duration_sec=3)
-        elif self.status_msg:
-            self.get_logger().warn(self.status_msg, throttle_duration_sec=3)
+        # if ready_state.data and self.status_msg:
+        #     self.get_logger().info(self.status_msg, throttle_duration_sec=3)
+        # elif self.status_msg:
+        #     self.get_logger().warn(self.status_msg, throttle_duration_sec=3)
 
     
     def get_usb_storage_path(self):
@@ -138,42 +214,42 @@ class CaptureNode(Node):
             self.has_storage = False
 
 
-    def touch_file(self, label):
-        self.file_path = os.path.join(self.folder_path, label)
-        try:
-            with open(self.file_path, 'w') as f:
-                pass  # create an empty file
-        except Exception as e:
-            self.get_logger().error(f"Failed to touch file at {self.file_path}: {e}")
-            self.has_storage = False
+    # def touch_file(self, label):
+    #     self.file_path = os.path.join(self.folder_path, label)
+    #     try:
+    #         with open(self.file_path, 'w') as f:
+    #             pass  # create an empty file
+    #     except Exception as e:
+    #         self.get_logger().error(f"Failed to touch file at {self.file_path}: {e}")
+    #         self.has_storage = False
 
 
-    def update_settings_callback(self, msg):
-        if self.busy:
-            self.get_logger().warn('cannot change settings while busy')
-            return
-        if msg.core_id:
-            self.label_prefix = msg.core_id
-        else:
-            self.label_prefix = "nolabel"
-
-        # validate exposures
-        for exp in (msg.exposure_ring, msg.exposure_uv):
-            if exp != '':
-                try:
-                    if exp > HIGHEST_EXPOSURE or exp < LOWEST_EXPOSURE:
-                        self.get_logger().error(f'invalid exposure: {exp}')
-                        return
-                except:
-                    self.get_logger().error(f'invalid exposure: {exp}')
-                    return
-
-        if msg.exposure_ring:
-            self.exposure_ring = msg.exposure_ring
-        if msg.exposure_uv:
-            self.exposure_uv = msg.exposure_uv
-        self.get_logger().info('successfully updated settings')
-        # self.get_logger().info(f'label: {msg.core_id}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
+    # def update_settings_callback(self, msg):
+    #     if self.busy:
+    #         self.get_logger().warn('cannot change settings while busy')
+    #         return
+    #     if msg.core_id:
+    #         self.label_prefix = msg.core_id
+    #     else:
+    #         self.label_prefix = "nolabel"
+    #
+    #     # validate exposures
+    #     for exp in (msg.exposure_ring, msg.exposure_uv):
+    #         if exp != '':
+    #             try:
+    #                 if exp > HIGHEST_EXPOSURE or exp < LOWEST_EXPOSURE:
+    #                     self.get_logger().error(f'invalid exposure: {exp}')
+    #                     return
+    #             except:
+    #                 self.get_logger().error(f'invalid exposure: {exp}')
+    #                 return
+    #
+    #     if msg.exposure_ring:
+    #         self.exposure_ring = msg.exposure_ring
+    #     if msg.exposure_uv:
+    #         self.exposure_uv = msg.exposure_uv
+    #     self.get_logger().info('successfully updated settings')
+    #     # self.get_logger().info(f'label: {msg.core_id}, e1: {msg.exposure_ring}, e2: {msg.exposure_uv}')
 
 
     def job_in_callback(self, msg):
@@ -184,35 +260,40 @@ class CaptureNode(Node):
                 label_suffix = 'noid'
             else:
                 label_suffix = msg.segment_id
-            self.active_job = (self.label_prefix + '-' + label_suffix)
+
+            label_prefix = self.get_parameter('prefix').value
+            exp_ring = self.get_parameter('exp_ring').value
+            exp_uv = self.get_parameter('exp_uv').value
+            
+            self.active_job = (label_prefix + '-' + label_suffix)
             self.tasks_todo.append({'type': 'lights',
                                     'mode': 'ring',
                                     'side': 'left'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'left',
                                     'label': self.active_job + '-ring',
-                                    'exposure': self.exposure_ring})
+                                    'exposure': exp_ring})
             self.tasks_todo.append({'type': 'lights',
                                     'mode': 'ring',
                                     'side': 'right'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'right',
                                     'label': self.active_job + '-ring',
-                                    'exposure': self.exposure_ring})
+                                    'exposure': exp_ring})
             self.tasks_todo.append({'type': 'lights',
                                     'mode': 'uv',
                                     'side': 'left'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'left',
                                     'label': self.active_job + '-uv',
-                                    'exposure': self.exposure_uv})
+                                    'exposure': exp_uv})
             self.tasks_todo.append({'type': 'lights',
                                     'mode': 'uv',
                                     'side': 'right'})
             self.tasks_todo.append({'type': 'capture',
                                     'side': 'right',
                                     'label': self.active_job + '-uv',
-                                    'exposure': self.exposure_uv})
+                                    'exposure': exp_uv})
             self.tasks_todo.append({'type': 'lights',
                                     'mode': 'preview',
                                     'side': ''})

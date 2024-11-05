@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import Bool
 from pcs_interfaces.msg import CaptureRequest
 
 import evdev
@@ -12,6 +13,10 @@ class BarcodeScannerNode(Node):
                 CaptureRequest,
                 '/capture',
                 10)
+        self.status_publisher = self.create_publisher(
+            Bool,
+            'has_barcode_scanner',
+            10)
         self.get_logger().info('Barcode scanner node up')
 
         self.device_path = '/dev/input/by-id/usb-OPTO-E_Barcode_Device-event-kbd'
@@ -22,14 +27,21 @@ class BarcodeScannerNode(Node):
         self.barcode_data = ''
 
     def timer_callback(self):
+        barcode_status = Bool()
         if not self.has_scanner:
+            barcode_status.data = False
             try:
                 self.device = evdev.InputDevice(self.device_path)
                 self.get_logger().info(f'Connected to device {self.device.name}')
                 self.listen_to_scanner()
+                barcode_status.data = True
             except Exception as e:
                 self.get_logger().warning(f'Could not connect to device: {e}', throttle_duration_sec=5)
-                return
+        else:
+            barcode_status.data = True
+        self.status_publisher.publish(barcode_status)
+
+
 
 
     def listen_to_scanner(self):

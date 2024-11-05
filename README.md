@@ -346,6 +346,7 @@ Changes to frontend:
 Todo this week:
 - finish hardware (put it in enclosure)
 - add better capability and progress notifications to frontend
+- add parameters to backend
 
 [Frontend changes]
 - add ros2 connected coloured bar at top
@@ -354,4 +355,5 @@ Todo this week:
     usb storage
     cameras (x2)
     numato box
+
 

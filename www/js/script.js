@@ -3,10 +3,6 @@ var ros = new ROSLIB.Ros();
 ros.connect('ws://localhost:9090');
 
 function updateROSStatus() {
-    var rosStatusBar = document.getElementById('ros-status-bar');
-    var rosStatusLabel = document.getElementById('ros-status-label');
-	var attempts = 10;
-    
     if (ros.isConnected) {
         rosStatusBar.classList.remove('bg-secondary');
         rosStatusBar.classList.remove('bg-danger');
@@ -19,10 +15,8 @@ function updateROSStatus() {
         rosStatusBar.classList.remove('bg-danger');
 		rosStatusLabel.innerText = 'Attempting to reconnect...'
         rosStatusBar.classList.add('bg-warning');
-
 		attempts = attempts - 1;
 		ros.connect('ws://localhost:9090');
-
     } else {
         rosStatusBar.classList.remove('bg-secondary');
         rosStatusBar.classList.remove('bg-danger');
@@ -32,6 +26,9 @@ function updateROSStatus() {
 	}
 }
 
+var rosStatusBar = document.getElementById('ros-status-bar');
+var rosStatusLabel = document.getElementById('ros-status-label');
+var attempts = 10;
 setInterval(updateROSStatus, 1500);
 
 // IMAGE PREVIEW
