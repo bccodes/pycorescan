@@ -23,7 +23,7 @@ setup(
             'capture_node = pcs_service.capture_node:main',
             'barcode_scanner_node = pcs_service.barcode_scanner_node:main',
             'led_switcher_node = pcs_service.led_switcher_node:main',
-
+            'parameter_client = pcs_service.parameter_client:main'
         ],
     },
 )

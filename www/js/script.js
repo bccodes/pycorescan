@@ -109,7 +109,7 @@ document.getElementById('prefixBtn').addEventListener('click', function() {
 	var message = new ROSLIB.Message({
 		data: inputPrefix.trim(),
 	});
-	update_prefix_topic .publish(message);
+	update_prefix_topic.publish(message);
 	console.log('Message published:', message);
 });
 var update_exp1_topic = new ROSLIB.Topic({
@@ -135,7 +135,7 @@ document.getElementById('exp2Btn').addEventListener('click', function() {
 	var message = new ROSLIB.Message({
 		data: inputE2 * 1.0,
 	});
-	update_exp2_topic .publish(message);
+	update_exp2_topic.publish(message);
 	console.log('Message published:', message);
 });
 

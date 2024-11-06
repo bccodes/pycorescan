@@ -13,6 +13,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 	"msg/CaptureRequest.msg"
 	"msg/UpdateSettings.msg"
 	"msg/SwitchLights.msg"
+	"msg/SetParameterMsg.msg"
 )
 
 if(BUILD_TESTING)

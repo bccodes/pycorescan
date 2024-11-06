@@ -47,7 +47,7 @@ class LightSwitcherNode(Node):
     def try_serial_connect(self):
         try:
             self.serPort = serial.Serial('/dev/ttyACM0', 19200, timeout=3)
-            self.get_logger().info('Numato Relay Box Connected.', throttle_duration_sec=5)
+            # self.get_logger().info('Numato Relay Box Connected.', throttle_duration_sec=5)
             success = True
         except Exception as e:
             self.get_logger().error('could not access numato board, check connection', throttle_duration_sec=5)

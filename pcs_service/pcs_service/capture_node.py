@@ -22,7 +22,7 @@ import time
 
 SIMULATE_RELAYS = False
 SIMULATE_CAMERAS = False
-HIGHEST_EXPOSURE = 400000
+HIGHEST_EXPOSURE = 1000000
 LOWEST_EXPOSURE = 100
 
 class CaptureNode(Node):
@@ -48,17 +48,17 @@ class CaptureNode(Node):
         #     10)
         self.prefix_sub = self.create_subscription(
                 String,
-                'set_prefix',
+                '/set_prefix',
                 self.set_prefix_callback,
                 10)
         self.exp_ring_sub = self.create_subscription(
                 Float32,
-                'set_exposure_ring',
+                '/set_exposure_ring',
                 self.set_exp_ring_callback,
                 10)
         self.exp_uv_sub = self.create_subscription(
                 Float32,
-                'set_exposure_uv',
+                '/set_exposure_uv',
                 self.set_exp_uv_callback,
                 10)
 
@@ -102,6 +102,7 @@ class CaptureNode(Node):
         self.set_parameters([my_new_param])
 
     def set_exp_ring_callback(self, msg):
+        self.get_logger().info(f'here...........')
         if self.busy:
             self.get_logger().warn('cannot change settings while busy')
             return
@@ -116,7 +117,12 @@ class CaptureNode(Node):
                     rclpy.Parameter.Type.DOUBLE,
                     msg.data
                     )
-            self.set_parameters([my_new_param])
+            new_basler_param = rclpy.parameter.Parameter(
+                    '/my_camera/camera_left/exposure',
+                    rclpy.Parameter.Type.DOUBLE,
+                    msg.data
+                    )
+            self.set_parameters([my_new_param, new_basler_param])
 
     def set_exp_uv_callback(self, msg):
         if self.busy:
@@ -159,7 +165,7 @@ class CaptureNode(Node):
         elif not self.tasks_todo: # ready
             if os.access(self.usb_path, os.W_OK):
                 ready_state.data = True
-                self.get_logger().info(f'ready to capture', throttle_duration_sec=10)
+                # self.get_logger().info(f'ready to capture', throttle_duration_sec=10)
                 self.status_msg = ""
             else: # we lost the usb?
                 self.has_storage = False
@@ -262,8 +268,10 @@ class CaptureNode(Node):
                 label_suffix = msg.segment_id
 
             label_prefix = self.get_parameter('prefix').value
-            exp_ring = self.get_parameter('exp_ring').value
-            exp_uv = self.get_parameter('exp_uv').value
+            # exp_ring = self.get_parameter('exp_ring').value
+            # exp_uv = self.get_parameter('exp_uv').value
+            exp_ring = self.exposure_ring
+            exp_uv = self.exposure_uv
             
             self.active_job = (label_prefix + '-' + label_suffix)
             self.tasks_todo.append({'type': 'lights',
