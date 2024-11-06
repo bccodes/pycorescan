@@ -12,7 +12,7 @@ from rclpy.node import Node
 
 from std_msgs.msg import Bool, String, Float32
 from pcs_interfaces.msg import CaptureRequest, UpdateSettings, SwitchLights
-# from pylon_ros2_camera_interfaces.action import GrabImages
+from pylon_ros2_camera_interfaces.action import GrabImages
 
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
@@ -20,15 +20,15 @@ import cv2
 import os
 import time
 
-SIMULATE_RELAYS = False
-SIMULATE_CAMERAS = False
+SIMULATE_RELAYS = True
+SIMULATE_CAMERAS = True
 HIGHEST_EXPOSURE = 1000000
 LOWEST_EXPOSURE = 100
 
 class CaptureNode(Node):
     def __init__(self):
         super().__init__('capture_node')
-        # self.label_prefix = 'nolabel'
+        self.label_prefix = 'nolabel'
         self.declare_parameter('prefix', 'noprefix')
         self.declare_parameter('exp_ring', 300000.0)
         self.declare_parameter('exp_uv', 200000.0)
@@ -94,15 +94,16 @@ class CaptureNode(Node):
         if self.busy:
             self.get_logger().warn('cannot change settings while busy')
             return
-        my_new_param = rclpy.parameter.Parameter(
-                'prefix',
-                rclpy.Parameter.Type.STRING,
-                msg.data
-                )
-        self.set_parameters([my_new_param])
+        self.label_prefix = msg.data
+        # my_new_param = rclpy.parameter.Parameter(
+        #         'prefix',
+        #         rclpy.Parameter.Type.STRING,
+        #         msg.data
+        #         )
+        # self.set_parameters([my_new_param])
+        self.get_logger().info(f'set prefix: {msg.data}')
 
     def set_exp_ring_callback(self, msg):
-        self.get_logger().info(f'here...........')
         if self.busy:
             self.get_logger().warn('cannot change settings while busy')
             return
@@ -112,17 +113,15 @@ class CaptureNode(Node):
             assert (data >= LOWEST_EXPOSURE)
         except:
             self.get_logger().error(f'invalid exposure for ring: {msg.data}')
-            my_new_param = rclpy.parameter.Parameter(
-                    'exp_ring',
-                    rclpy.Parameter.Type.DOUBLE,
-                    msg.data
-                    )
-            new_basler_param = rclpy.parameter.Parameter(
-                    '/my_camera/camera_left/exposure',
-                    rclpy.Parameter.Type.DOUBLE,
-                    msg.data
-                    )
-            self.set_parameters([my_new_param, new_basler_param])
+            return
+        self.exposure_ring = msg.data
+        # my_new_param = rclpy.parameter.Parameter(
+        #         'exp_ring',
+        #         rclpy.Parameter.Type.DOUBLE,
+        #         msg.data
+        #         )
+        # self.set_parameters([my_new_param])
+        self.get_logger().info(f'applied ring exposure: {msg.data}')
 
     def set_exp_uv_callback(self, msg):
         if self.busy:
@@ -134,12 +133,15 @@ class CaptureNode(Node):
             assert (data >= LOWEST_EXPOSURE)
         except:
             self.get_logger().error(f'invalid exposure for uv: {msg.data}')
-            my_new_param = rclpy.parameter.Parameter(
-                    'exp_uv',
-                    rclpy.Parameter.Type.DOUBLE,
-                    msg.data
-                    )
-            self.set_parameters([my_new_param])
+            return
+        self.exposure_uv = msg.data
+        # my_new_param = rclpy.parameter.Parameter(
+        #         'exp_uv',
+        #         rclpy.Parameter.Type.DOUBLE,
+        #         msg.data
+        #         )
+        # self.set_parameters([my_new_param])
+        self.get_logger().info(f'applied uv exposure: {msg.data}')
 
 
     def timer_callback(self):
@@ -204,7 +206,9 @@ class CaptureNode(Node):
                 if os.path.isdir(subdir) and os.access(subdir, os.W_OK):
                     # self.get_logger().info(f'found usb storage at {subdir}')
                     self.create_folder(subdir)
+                    self.get_logger().info(f'found storage at {subdir}')
                     return subdir
+        # self.get_logger().warn(f'no usb storage detected', throttle_duration_sec=5)
         return ""
 
 

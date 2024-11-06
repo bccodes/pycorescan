@@ -35,8 +35,10 @@ class BarcodeScannerNode(Node):
                 self.get_logger().info(f'Connected to device {self.device.name}')
                 self.listen_to_scanner()
                 barcode_status.data = True
-            except Exception as e:
-                self.get_logger().warning(f'Could not connect to device: {e}', throttle_duration_sec=5)
+            except:
+                pass
+            # except Exception as e:
+                # self.get_logger().warning(f'Could not connect to device: {e}', throttle_duration_sec=5)
         else:
             barcode_status.data = True
         self.status_publisher.publish(barcode_status)

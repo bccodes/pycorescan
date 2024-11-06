@@ -143,8 +143,8 @@ document.getElementById('exp2Btn').addEventListener('click', function() {
 // CAPTURE REQUEST
 var capture_topic = new ROSLIB.Topic({
 	ros: ros,
-	name: '/capture',  // replace with your ros topic name
-	messagetype: 'pcs_interfaces/CaptureRequest'  // replace with your message type
+	name: '/capture',
+	messagetype: 'pcs_interfaces/CaptureRequest'
 });
 
 document.getElementById('captureBtn').addEventListener('click', function() {

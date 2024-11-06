@@ -70,7 +70,7 @@
 			</div>
 
 
-			<div class="mt-4">
+			<div class="container mt-4">
 				<h1>Update Settings</h1>
 				Prefix<br><input type="text" id="inputPrefix" placeholder="Enter Core ID" />
 				<button id="prefixBtn" class="btn btn-warning">Update Prefix</button><br>
@@ -88,18 +88,21 @@
 				<!-- Refresh button -->
 				<button class="btn btn-secondary" onclick="refreshBtn()">Refresh</button>
 				<!-- iFrame to show file tree -->
-				<iframe id="iframe" onload="styleIframe()" src="./storage/" width="100%" style="border:1px solid; overflow-y: scroll;">
+			<div class="iframe-container">
+				<iframe id="iframe" onload="styleIframe()" src="./storage/" width="100%" style="border:1px solid; overflow-y: scroll;" class="responsive-iframe">
 					your browser does not support iframes.
 				</iframe>
+			</div>
 			</div>
 
 
 			<div class="mt-4">
 				<h1>ROS2 Logging</h1>
-				<!-- <p>ROS2 Connection: <span id="status" style="font-weight: bold;"></span></p> -->
+				<div class="log-container-wrapper">
 
-				<div id="logContainer" style="border: 1px solid; height: 10em; overflow-y: scroll; padding: 10px; background-color: white;">
-					<!-- Log messages will be displayed here -->
+					<div id="logContainer" style="border: 1px solid; height: 10em; overflow-y: scroll; padding: 10px; background-color: white;">
+						<!-- Log messages will be displayed here -->
+					</div>
 				</div>
 			</div>
 
