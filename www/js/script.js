@@ -13,7 +13,7 @@ function updateROSStatus() {
         rosStatusBar.classList.remove('bg-secondary');
         rosStatusBar.classList.remove('bg-danger');
         rosStatusBar.classList.remove('bg-danger');
-		rosStatusLabel.innerText = 'Attempting to reconnect...'
+		rosStatusLabel.innerText = 'Attempting To Reconnect ROS2...'
         rosStatusBar.classList.add('bg-warning');
 		attempts = attempts - 1;
 		ros.connect('ws://localhost:9090');
@@ -21,7 +21,7 @@ function updateROSStatus() {
         rosStatusBar.classList.remove('bg-secondary');
         rosStatusBar.classList.remove('bg-danger');
         rosStatusBar.classList.remove('bg-warning');
-		rosStatusLabel.innerText = 'Lost Connection, Please Refresh'
+		rosStatusLabel.innerText = 'Lost Connection To ROS2, Please Refresh'
         rosStatusBar.classList.add('bg-danger');
 	}
 }
