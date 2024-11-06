@@ -140,27 +140,6 @@ document.getElementById('exp2Btn').addEventListener('click', function() {
 });
 
 
-
-// Add event listener to the button
-// document.getElementById('settingsBtn').addEventListener('click', function() {
-//     // Get values from the three input fields
-//     var inputE1 = document.getElementById('inputE1').value;
-//     var inputE2 = document.getElementById('inputE2').value;
-//     var inputPrefix = document.getElementById('inputPrefix').value;
-//
-// 	// Create a ROS message with e1, e2, and prefix
-// 	var message = new ROSLIB.Message({
-// 		exposure_ring: inputE1 * 1,
-// 		exposure_uv: inputE2 * 1,
-// 		core_id: inputPrefix
-// 	});
-//
-// 	// Publish the message
-// 	update_settings_topic.publish(message);
-// 	console.log('Message published:', message);
-// });
-
-
 // CAPTURE REQUEST
 var capture_topic = new ROSLIB.Topic({
 	ros: ros,
@@ -178,17 +157,17 @@ document.getElementById('captureBtn').addEventListener('click', function() {
 
 
 // FILE BROWSER
-// var iframe = document.getElementById('iframe');
-// // back button
-// function backBtn() {
-// 	iframe.contentWindow.history.go(-1);
-// }
-// // refresh button
-// function refreshBtn() {
-// 	iframe.contentWindow.location.reload();
-// }
-// function refreshIframe() {
-//     var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+var iframe = document.getElementById('iframe');
+// back button
+function backBtn() {
+	iframe.contentWindow.history.go(-1);
+}
+// refresh button
+function refreshBtn() {
+	iframe.contentWindow.location.reload();
+}
+function styleIframe() {
+    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 //
 // 	function adjustIframeHeight() {
 // 		var contentHeight = document.getElementById('preview_frame').scrollHeight;
@@ -197,74 +176,75 @@ document.getElementById('captureBtn').addEventListener('click', function() {
 // 	}
 //
 // 	// Function to apply styles to images in the iframe
-// 	function applyStyles() {
-// 		var style = iframeDoc.createElement('style');
-// 		style.innerHTML = `
-// 			img {
-// 			width: 100%;
-// 			max-width: 100%;
-// 			height: auto;
-// 			display: block;
-// 			margin: 0 auto;
-// 			}
-// 			body {
-// 			margin: 0;
-// 			padding: 0;
-// 			overflow: hidden;
-// 			font-family: inherit;
-// 			}
-// 			h1, hr {
-// 			display: none; /* Hide the directory header and line */
-// 			}
-// 			i.fas {
-// 			color: grey; /* Set icon color to grey */
-// 			}
-// 			`;
-// 		iframeDoc.head.appendChild(style);
-// 	}
+	function applyStyles() {
+		var style = iframeDoc.createElement('style');
+		style.innerHTML = `
+			img {
+			width: 100%;
+			max-width: 100%;
+			height: auto;
+			display: block;
+			margin: 0 auto;
+			}
+			body {
+			margin: 0;
+			padding: 0;
+			<!-- overflow: hidden; -->
+			font-family: inherit;
+			}
+			h1, hr {
+			display: none; /* Hide the directory header and line */
+			}
+			i.fas {
+			color: grey; /* Set icon color to grey */
+			}
+			`;
+		iframeDoc.head.appendChild(style);
+	}
 //
-// 	function applyStylesToList() {
-// 		// Add Bootstrap CSS to the iframe's head if not already present
-// 		if (!iframeDoc.getElementById('bootstrap-link')) {
-// 			var bootstrapLink = iframeDoc.createElement('link');
-// 			bootstrapLink.id = 'bootstrap-link';
-// 			bootstrapLink.rel = 'stylesheet';
-// 			bootstrapLink.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css';
-// 			iframeDoc.head.appendChild(bootstrapLink);
-// 		}
-// 		// Add FontAwesome CSS to the iframe's head if not already present
-// 		if (!iframeDoc.getElementById('fontawesome-link')) {
-// 			var fontAwesomeLink = iframeDoc.createElement('link');
-// 			fontAwesomeLink.id = 'fontawesome-link';
-// 			fontAwesomeLink.rel = 'stylesheet';
-// 			fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
-// 			iframeDoc.head.appendChild(fontAwesomeLink);
-// 		}
-//
-// 		// Apply icons to each list item based on whether it's a file or a folder
-// 		var listItems = iframeDoc.querySelectorAll('li');
-// 		listItems.forEach(function(item) {
-// 			if (item.textContent.includes('.png') || item.textContent.includes('.jpg')) {// Assume it's an image
-// 				item.innerHTML = `<i class="fas fa-image"></i> ${item.innerHTML}`;
-// 			} else if (item.textContent.includes('.')) {// Assume it's a file
-// 				item.innerHTML = `<i class="fas fa-file"></i> ${item.innerHTML}`;
-// 			} else {// Otherwise, assume it's a folder
-// 				item.innerHTML = `<i class="fas fa-folder"></i> ${item.innerHTML}`;
-// 			}
-// 		});
-// 	}
+	function applyStylesToList() {
+		// Add Bootstrap CSS to the iframe's head if not already present
+		if (!iframeDoc.getElementById('bootstrap-link')) {
+			var bootstrapLink = iframeDoc.createElement('link');
+			bootstrapLink.id = 'bootstrap-link';
+			bootstrapLink.rel = 'stylesheet';
+			bootstrapLink.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css';
+			iframeDoc.head.appendChild(bootstrapLink);
+		}
+		// Add FontAwesome CSS to the iframe's head if not already present
+		if (!iframeDoc.getElementById('fontawesome-link')) {
+			var fontAwesomeLink = iframeDoc.createElement('link');
+			fontAwesomeLink.id = 'fontawesome-link';
+			fontAwesomeLink.rel = 'stylesheet';
+			fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+			iframeDoc.head.appendChild(fontAwesomeLink);
+		}
+
+		// Apply icons to each list item based on whether it's a file or a folder
+		var listItems = iframeDoc.querySelectorAll('li');
+		listItems.forEach(function(item) {
+			var str = item.textContent
+			if (str.includes('.png') || str.includes('.jpg')) {
+				item.innerHTML = `<i class="fas fa-image"></i> ${item.innerHTML}`;
+			} else if (str.charAt(str.length - 1) == '/') {
+				item.innerHTML = `<i class="fas fa-folder"></i> ${item.innerHTML}`;
+			} else {
+				item.innerHTML = `<i class="fas fa-file"></i> ${item.innerHTML}`;
+			}
+		});
+	}	
 //
 //     // Initial styling application
-//     applyStyles();
-//     applyStylesToList();
+    applyStyles();
+    applyStylesToList();
 //
 //     // Adjust the height initially when the iframe loads
 //     adjustIframeHeight();
-// };
+};
 
 // window.addEventListener('load', function() {
-// 	refreshIframe(); // Resize the iframe on back navigation
-// 	refreshBtn();
+// 	styleIframe(); // Resize the iframe on back navigation
+// // 	refreshBtn();
 // });
 // var refreshTimer = setInterval(refreshBtn, 1000);
 
