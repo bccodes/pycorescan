@@ -6,6 +6,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
+from std_msgs.msg import Bool
 from pcs_interfaces.msg import SwitchLights
 
 import serial
@@ -27,6 +28,11 @@ class LightSwitcherNode(Node):
                 self.switch_lights_callback,
                 10)
 
+        self.status_publisher = self.create_publisher(
+                Bool,
+                'has_relays',
+                10)
+
         self.status_timer = self.create_timer(
                 1,
                 self.timer_callback)
@@ -34,7 +40,9 @@ class LightSwitcherNode(Node):
 
     def timer_callback(self):
         self.has_serial = self.try_serial_connect()
-
+        status_msg = Bool()
+        status_msg.data = self.has_serial
+        selt.status_publisher.publish(status_msg)
     
     def try_serial_connect(self):
         try:
