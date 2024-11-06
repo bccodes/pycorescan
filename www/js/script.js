@@ -31,15 +31,57 @@ var rosStatusLabel = document.getElementById('ros-status-label');
 var attempts = 10;
 setInterval(updateROSStatus, 1500);
 
+var relayStatusTopic = new ROSLIB.Topic({
+	ros: ros,
+	name: '/has_relays',
+	messageType: 'std_msgs/Bool'
+});
+relayStatusTopic.subscribe(function(message) {
+	var relayStatusBar = document.getElementById('relay-status-bar');
+	if (message.data === false) {
+		relayStatusBar.style.display = 'block'; // Show the element
+	} else {
+		relayStatusBar.style.display = 'none';  // Hide the element
+	}
+});
+var barcodeStatusTopic = new ROSLIB.Topic({
+	ros: ros,
+	name: '/has_barcode_scanner',
+	messageType: 'std_msgs/Bool'
+});
+barcodeStatusTopic.subscribe(function(message) {
+	var statusBar = document.getElementById('barcode-status-bar');
+	if (message.data === false) {
+		statusBar.style.display = 'block'; // Show the element
+	} else {
+		statusBar.style.display = 'none';  // Hide the element
+	}
+});
+
+var usbStatusTopic = new ROSLIB.Topic({
+	ros: ros,
+	name: '/has_storage',
+	messageType: 'std_msgs/Bool'
+});
+usbStatusTopic.subscribe(function(message) {
+	var statusBar = document.getElementById('usb-status-bar');
+	if (message.data === false) {
+		statusBar.style.display = 'block'; // Show the element
+	} else {
+		statusBar.style.display = 'none';  // Hide the element
+	}
+});
+
+
 // IMAGE PREVIEW
 var leftTopic = new ROSLIB.Topic({
     ros : ros,
-    name : '/my_camera/some_node/image_raw/compressed',
+    name : '/my_camera/camera_left/image_raw/compressed',
     messageType : 'sensor_msgs/CompressedImage'
 });
 var rightTopic = new ROSLIB.Topic({
     ros : ros,
-    name : '/my_camera/charlie_c/image_raw/compressed',
+    name : '/my_camera/camera_right/image_raw/compressed',
     messageType : 'sensor_msgs/CompressedImage'
 });
 
@@ -57,30 +99,66 @@ rightTopic.subscribe(function(message) {
 
 
 // UPDATE SETTINGS
-var update_settings_topic = new ROSLIB.Topic({
+var update_prefix_topic = new ROSLIB.Topic({
     ros: ros,
-    name: '/update_settings',  // Replace with your new ROS topic name
-    messageType: 'pcs_interfaces/UpdateSettings'  // Replace with your new message type
+    name: '/set_prefix',  // Replace with your new ROS topic name
+    messageType: 'std_msgs/String'  // Replace with your new message type
 });
-
-// Add event listener to the button
-document.getElementById('settingsBtn').addEventListener('click', function() {
-    // Get values from the three input fields
-    var inputE1 = document.getElementById('inputE1').value;
-    var inputE2 = document.getElementById('inputE2').value;
+document.getElementById('prefixBtn').addEventListener('click', function() {
     var inputPrefix = document.getElementById('inputPrefix').value;
-
-	// Create a ROS message with e1, e2, and prefix
 	var message = new ROSLIB.Message({
-		exposure_ring: inputE1 * 1,
-		exposure_uv: inputE2 * 1,
-		core_id: inputPrefix
+		data: inputPrefix.trim(),
 	});
-
-	// Publish the message
-	update_settings_topic.publish(message);
+	update_prefix_topic .publish(message);
 	console.log('Message published:', message);
 });
+var update_exp1_topic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/set_exposure_ring',  // Replace with your new ROS topic name
+    messageType: 'std_msgs/Float32'  // Replace with your new message type
+});
+document.getElementById('exp1Btn').addEventListener('click', function() {
+    var inputE1 = document.getElementById('inputE1').value;
+	var message = new ROSLIB.Message({
+		data: inputE1 * 1,
+	});
+	update_exp1_topic.publish(message);
+	console.log('Message published:', message);
+});
+var update_exp2_topic = new ROSLIB.Topic({
+    ros: ros,
+    name: '/set_exposure_uv',  // Replace with your new ROS topic name
+    messageType: 'std_msgs/Float32'  // Replace with your new message type
+});
+document.getElementById('exp2Btn').addEventListener('click', function() {
+    var inputE2 = document.getElementById('inputE2').value;
+	var message = new ROSLIB.Message({
+		data: inputE2 * 1.0,
+	});
+	update_exp2_topic .publish(message);
+	console.log('Message published:', message);
+});
+
+
+
+// Add event listener to the button
+// document.getElementById('settingsBtn').addEventListener('click', function() {
+//     // Get values from the three input fields
+//     var inputE1 = document.getElementById('inputE1').value;
+//     var inputE2 = document.getElementById('inputE2').value;
+//     var inputPrefix = document.getElementById('inputPrefix').value;
+//
+// 	// Create a ROS message with e1, e2, and prefix
+// 	var message = new ROSLIB.Message({
+// 		exposure_ring: inputE1 * 1,
+// 		exposure_uv: inputE2 * 1,
+// 		core_id: inputPrefix
+// 	});
+//
+// 	// Publish the message
+// 	update_settings_topic.publish(message);
+// 	console.log('Message published:', message);
+// });
 
 
 // CAPTURE REQUEST
@@ -100,94 +178,94 @@ document.getElementById('captureBtn').addEventListener('click', function() {
 
 
 // FILE BROWSER
-var iframe = document.getElementById('iframe');
-// back button
-function backBtn() {
-	iframe.contentWindow.history.go(-1);
-}
-// refresh button
-function refreshBtn() {
-	iframe.contentWindow.location.reload();
-}
-function refreshIframe() {
-    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+// var iframe = document.getElementById('iframe');
+// // back button
+// function backBtn() {
+// 	iframe.contentWindow.history.go(-1);
+// }
+// // refresh button
+// function refreshBtn() {
+// 	iframe.contentWindow.location.reload();
+// }
+// function refreshIframe() {
+//     var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+//
+// 	function adjustIframeHeight() {
+// 		var contentHeight = document.getElementById('preview_frame').scrollHeight;
+// 		// var contentHeight = Math.max(iframeDoc.body.scrollHeight, iframeDoc.documentElement.scrollHeight);
+// 		iframe.style.height = contentHeight + 'px';
+// 	}
+//
+// 	// Function to apply styles to images in the iframe
+// 	function applyStyles() {
+// 		var style = iframeDoc.createElement('style');
+// 		style.innerHTML = `
+// 			img {
+// 			width: 100%;
+// 			max-width: 100%;
+// 			height: auto;
+// 			display: block;
+// 			margin: 0 auto;
+// 			}
+// 			body {
+// 			margin: 0;
+// 			padding: 0;
+// 			overflow: hidden;
+// 			font-family: inherit;
+// 			}
+// 			h1, hr {
+// 			display: none; /* Hide the directory header and line */
+// 			}
+// 			i.fas {
+// 			color: grey; /* Set icon color to grey */
+// 			}
+// 			`;
+// 		iframeDoc.head.appendChild(style);
+// 	}
+//
+// 	function applyStylesToList() {
+// 		// Add Bootstrap CSS to the iframe's head if not already present
+// 		if (!iframeDoc.getElementById('bootstrap-link')) {
+// 			var bootstrapLink = iframeDoc.createElement('link');
+// 			bootstrapLink.id = 'bootstrap-link';
+// 			bootstrapLink.rel = 'stylesheet';
+// 			bootstrapLink.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css';
+// 			iframeDoc.head.appendChild(bootstrapLink);
+// 		}
+// 		// Add FontAwesome CSS to the iframe's head if not already present
+// 		if (!iframeDoc.getElementById('fontawesome-link')) {
+// 			var fontAwesomeLink = iframeDoc.createElement('link');
+// 			fontAwesomeLink.id = 'fontawesome-link';
+// 			fontAwesomeLink.rel = 'stylesheet';
+// 			fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+// 			iframeDoc.head.appendChild(fontAwesomeLink);
+// 		}
+//
+// 		// Apply icons to each list item based on whether it's a file or a folder
+// 		var listItems = iframeDoc.querySelectorAll('li');
+// 		listItems.forEach(function(item) {
+// 			if (item.textContent.includes('.png') || item.textContent.includes('.jpg')) {// Assume it's an image
+// 				item.innerHTML = `<i class="fas fa-image"></i> ${item.innerHTML}`;
+// 			} else if (item.textContent.includes('.')) {// Assume it's a file
+// 				item.innerHTML = `<i class="fas fa-file"></i> ${item.innerHTML}`;
+// 			} else {// Otherwise, assume it's a folder
+// 				item.innerHTML = `<i class="fas fa-folder"></i> ${item.innerHTML}`;
+// 			}
+// 		});
+// 	}
+//
+//     // Initial styling application
+//     applyStyles();
+//     applyStylesToList();
+//
+//     // Adjust the height initially when the iframe loads
+//     adjustIframeHeight();
+// };
 
-	function adjustIframeHeight() {
-		var contentHeight = document.getElementById('preview_frame').scrollHeight;
-		// var contentHeight = Math.max(iframeDoc.body.scrollHeight, iframeDoc.documentElement.scrollHeight);
-		iframe.style.height = contentHeight + 'px';
-	}
-
-	// Function to apply styles to images in the iframe
-	function applyStyles() {
-		var style = iframeDoc.createElement('style');
-		style.innerHTML = `
-			img {
-			width: 100%;
-			max-width: 100%;
-			height: auto;
-			display: block;
-			margin: 0 auto;
-			}
-			body {
-			margin: 0;
-			padding: 0;
-			overflow: hidden;
-			font-family: inherit;
-			}
-			h1, hr {
-			display: none; /* Hide the directory header and line */
-			}
-			i.fas {
-			color: grey; /* Set icon color to grey */
-			}
-			`;
-		iframeDoc.head.appendChild(style);
-	}
-
-	function applyStylesToList() {
-		// Add Bootstrap CSS to the iframe's head if not already present
-		if (!iframeDoc.getElementById('bootstrap-link')) {
-			var bootstrapLink = iframeDoc.createElement('link');
-			bootstrapLink.id = 'bootstrap-link';
-			bootstrapLink.rel = 'stylesheet';
-			bootstrapLink.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css';
-			iframeDoc.head.appendChild(bootstrapLink);
-		}
-		// Add FontAwesome CSS to the iframe's head if not already present
-		if (!iframeDoc.getElementById('fontawesome-link')) {
-			var fontAwesomeLink = iframeDoc.createElement('link');
-			fontAwesomeLink.id = 'fontawesome-link';
-			fontAwesomeLink.rel = 'stylesheet';
-			fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
-			iframeDoc.head.appendChild(fontAwesomeLink);
-		}
-
-		// Apply icons to each list item based on whether it's a file or a folder
-		var listItems = iframeDoc.querySelectorAll('li');
-		listItems.forEach(function(item) {
-			if (item.textContent.includes('.png') || item.textContent.includes('.jpg')) {// Assume it's an image
-				item.innerHTML = `<i class="fas fa-image"></i> ${item.innerHTML}`;
-			} else if (item.textContent.includes('.')) {// Assume it's a file
-				item.innerHTML = `<i class="fas fa-file"></i> ${item.innerHTML}`;
-			} else {// Otherwise, assume it's a folder
-				item.innerHTML = `<i class="fas fa-folder"></i> ${item.innerHTML}`;
-			}
-		});
-	}
-
-    // Initial styling application
-    applyStyles();
-    applyStylesToList();
-    
-    // Adjust the height initially when the iframe loads
-    adjustIframeHeight();
-};
-
-window.addEventListener('load', function() {
-	refreshIframe(); // Resize the iframe on back navigation
-	refreshBtn();
-});
+// window.addEventListener('load', function() {
+// 	refreshIframe(); // Resize the iframe on back navigation
+// 	refreshBtn();
+// });
 // var refreshTimer = setInterval(refreshBtn, 1000);
 
 

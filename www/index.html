@@ -3,7 +3,9 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>CSIRO Core Scanner v1.0</title>
+		<title>CSIRO Core Scanner</title>
+		<link rel="icon" href="svg/CSIRO_Logo.svg">
+
 		<!-- boostrap -->	
 		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 		<!-- font awesome -->
@@ -12,6 +14,7 @@
 		<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
 		<!-- local styles -->	
 		<link rel="stylesheet" href="css/custom.css">
+
 	</head>
 	<body>
 		<div class="container-fluid top-panel bg-primary text-white mb-0">
@@ -26,12 +29,24 @@
 			</div>
 		</div>
 
-		<div id="ros-status-bar" class="bg-secondary container-fluid text-white text-center">
-			<h6 id="ros-status-label" class="mt-0 mb-0">ROS2 Connecting...</h6>
+		<div id="ros-status-bar" class="ros-status-bar bg-secondary container-fluid text-white text-center">
+			<h6 id="ros-status-label" class="mt-0 mb-0">Initializing ROS2...</h6>
 		</div>
 
-		<div class="container text-center">
-			<div id="preview_frame" class="mt-4 mb-4">
+		<div id="relay-status-bar" class="status-bar bg-danger container-fluid text-white text-center">
+			<h6 id="relay-status-label" class="mt-0 mb-0">Relays Disconnected</h6>
+		</div>
+
+		<div id="barcode-status-bar" class="status-bar bg-danger container-fluid text-white text-center">
+			<h6 id="barcode-status-label" class="mt-0 mb-0">Barcode Scanner Disconnected</h6>
+		</div>
+
+		<div id="usb-status-bar" class="status-bar bg-danger container-fluid text-white text-center">
+			<h6 id="usb-status-label" class="mt-0 mb-0">USB Storage Disconnected</h6>
+		</div>
+
+		<div class="container text-center mb-4">
+			<div id="preview_frame" class="mt-4">
 				<h1>Live Preview</h1>
 				<div class="row">
 					<div class="col-6 d-flex justify-content-center">
@@ -48,22 +63,25 @@
 			</div>
 
 
-			<div class="mb-4">
-				<h1>Update Settings</h1>
-				Ring Exposure<br><input value="300000" type="text" id="inputE1" placeholder="Default 300000" /><br>
-				UV Exposure<br><input value="200000" type="text" id="inputE2" placeholder="Default 200000" /><br>
-				Prefix<br><input type="text" id="inputPrefix" placeholder="Enter Core ID" /><br>
-				<button id="settingsBtn" class="btn btn-secondary">Update Settings</button>
-			</div>
-
-			<div class="mb-4">
+			<div class="mt-4">
 				<h1>Capture Request</h1>
 				<input type="text" id="captureInput" placeholder="Enter Segment ID" />
-				<button id="captureBtn" class="btn btn-primary">Get Images</button>
+				<button id="captureBtn" class="btn btn-primary">Grab Images</button>
 			</div>
 
 
-			<div class="mb-4">
+			<div class="mt-4">
+				<h1>Update Settings</h1>
+				Prefix<br><input type="text" id="inputPrefix" placeholder="Enter Core ID" />
+				<button id="prefixBtn" class="btn btn-warning">Update Prefix</button><br>
+				Ring Exposure<br><input value="300000" type="text" id="inputE1" placeholder="Default 300000" />
+				<button id="exp1Btn" class="btn btn-info">Set Exposure 1</button><br>
+				UV Exposure<br><input value="200000" type="text" id="inputE2" placeholder="Default 200000" />
+				<button id="exp2Btn" class="btn btn-info">Set Exposure 2</button><br>
+			</div>
+
+
+			<div class="mt-4">
 				<h1>USB Storage Preview</h1>
 				<!-- Back button -->
 				<button class="btn btn-secondary" onclick="backBtn()">Go Back</button>
@@ -76,7 +94,7 @@
 			</div>
 
 
-			<div class="mb-4">
+			<div class="mt-4">
 				<h1>ROS2 Logging</h1>
 				<!-- <p>ROS2 Connection: <span id="status" style="font-weight: bold;"></span></p> -->
 

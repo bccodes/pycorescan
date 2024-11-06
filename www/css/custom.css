@@ -4,10 +4,20 @@
 
 .logo {
     height: 50px;
-    /* width: auto; */
 }
 
-#ros-status-bar {
+body {
+	background-color: #DDDDDD;
+}
+
+.ros-status-bar {
+    padding: 8px 0;
+    transition: background-color 0.3s ease;
+    background-color: gray;
+}
+
+.status-bar {
+	display: none;
     padding: 10px 0;
     transition: background-color 0.3s ease;
     background-color: gray;
@@ -28,5 +38,4 @@
     height: 100%;
     object-fit: cover;
 }
-
 

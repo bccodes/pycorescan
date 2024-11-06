@@ -42,7 +42,7 @@ class LightSwitcherNode(Node):
         self.has_serial = self.try_serial_connect()
         status_msg = Bool()
         status_msg.data = self.has_serial
-        selt.status_publisher.publish(status_msg)
+        self.status_publisher.publish(status_msg)
     
     def try_serial_connect(self):
         try:
