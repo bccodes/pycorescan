@@ -20,9 +20,9 @@ import cv2
 import os
 import time
 
-SIMULATE_RELAYS = True
-SIMULATE_CAMERAS = True
-HIGHEST_EXPOSURE = 1000000
+SIMULATE_RELAYS = False
+SIMULATE_CAMERAS = False
+HIGHEST_EXPOSURE = 450000
 LOWEST_EXPOSURE = 100
 
 class CaptureNode(Node):
@@ -172,6 +172,7 @@ class CaptureNode(Node):
             else: # we lost the usb?
                 self.has_storage = False
         else: # busy
+            self.get_logger().info(f'number of tasks remaining: {len(self.tasks_todo)}')
             if not self.active_job:
                 self.get_logger().info(f'something went wrong... no active job but busy?', throttle_duration_sec=1)
             self.get_logger().info(f'working on job {self.active_job}', throttle_duration_sec=1)
@@ -310,7 +311,8 @@ class CaptureNode(Node):
                                     'mode': 'preview',
                                     'side': ''})
         
-        self.get_logger().info(str(self.tasks_todo))
+        # self.get_logger().info(str('\n'.join(self.tasks_todo)))
+        self.get_logger().info(f'number of tasks remaining: {len(self.tasks_todo)}')
 
 
     def run_task(self, task):
@@ -350,13 +352,13 @@ class CaptureNode(Node):
                 self._cam_client = ActionClient(
                     self,
                     GrabImages,
-                    '/my_camera/some_node/grab_images_raw')
+                    '/my_camera/camera_left/grab_images_raw')
                 self._cam_client.wait_for_server()
             case 'right':
                 self._cam_client = ActionClient(
                     self,
                     GrabImages,
-                    '/my_camera/charlie_c/grab_images_raw')
+                    '/my_camera/camera_right/grab_images_raw')
                 self._cam_client.wait_for_server()
             case _:
                 self.get_logger().warn('something went wrong no active_side')
@@ -392,9 +394,10 @@ class CaptureNode(Node):
 
     def save_image(self, image):
         self.get_logger().info('Saving image ' + self.active_label)
+        
         try:
             cv2_img = self.cv_bridge.imgmsg_to_cv2(image, "bgr8")
-            cv2.imwrite(self.folder_path + '/' + self.active_label + '-' + self.active_side + self.time_string + '.png', cv2_img)
+            cv2.imwrite(self.folder_path + '/' + self.time_string + '-' + self.active_label + '-' + self.active_side + '-' + str(int(self.active_exposure)) + '.png', cv2_img)
         except CvBridgeError as e:
             self.get_logger().error('CVBridgeError')
             print(e)

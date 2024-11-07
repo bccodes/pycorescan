@@ -1,6 +1,10 @@
 // ROS2 STATUS
-var ros = new ROSLIB.Ros();
-ros.connect('ws://localhost:9090');
+// var ros = new ROSLIB.Ros();
+var ip = location.hostname;
+var ros = new ROSLIB.Ros({ url: 'ws://' + ip + ':9090' });
+
+
+ros.connect();
 
 function updateROSStatus() {
     if (ros.isConnected) {
@@ -16,7 +20,7 @@ function updateROSStatus() {
 		rosStatusLabel.innerText = 'Attempting To Reconnect ROS2...'
         rosStatusBar.classList.add('bg-warning');
 		attempts = attempts - 1;
-		ros.connect('ws://localhost:9090');
+		ros.connect();
     } else {
         rosStatusBar.classList.remove('bg-secondary');
         rosStatusBar.classList.remove('bg-danger');

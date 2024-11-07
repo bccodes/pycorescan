@@ -21,6 +21,9 @@ class LightSwitcherNode(Node):
             self.has_serial = True
         else:
             self.has_serial = self.try_serial_connect()
+
+        if self.has_serial:
+            self.get_logger().info('relays connected OK')
         
         self.task_sub = self.create_subscription(
                 SwitchLights,
@@ -47,7 +50,6 @@ class LightSwitcherNode(Node):
     def try_serial_connect(self):
         try:
             self.serPort = serial.Serial('/dev/ttyACM0', 19200, timeout=3)
-            self.get_logger().info('relays connected OK')
             # self.get_logger().info('Numato Relay Box Connected.', throttle_duration_sec=5)
             success = True
         except Exception as e:
