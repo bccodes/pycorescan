@@ -53,7 +53,7 @@ class LightSwitcherNode(Node):
             # self.get_logger().info('Numato Relay Box Connected.', throttle_duration_sec=5)
             success = True
         except Exception as e:
-            # self.get_logger().error('could not access numato board, check connection', throttle_duration_sec=5)
+            self.get_logger().error('could not access numato board, check connection', throttle_duration_sec=5)
             # print(e)
             success = False
         return success
